@@ -44,3 +44,19 @@ nk_solve_verdict_matrix_free(nk_solve_verdict_matrix_t * matrix)
     return NK_SOLVE_ERROR__SUCCESS;
 }
 
+NK_SOLVE_ERROR_CODE
+nk_solve_verdict_matrix_set(
+    nk_solve_verdict_matrix_t * board,
+    gint y,
+    gint x,
+    nk_solve_verdict_t value
+    )
+{
+    if ( ! ((y >= 0) && (y < board->height)) )
+    {
+        return NK_SOLVE_ERROR__Y_OUT_OF_BOUNDS;
+    }
+
+    return NK_SOLVE_ERROR__ALLOC_FAILED;
+}
+
