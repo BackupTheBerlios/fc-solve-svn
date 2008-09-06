@@ -2,7 +2,7 @@
 from TAP.Simple import *
 from ctypes import *
 
-plan(10)
+plan(11)
 
 NK_SOLVE_ERROR__SUCCESS = 0
 NK_SOLVE_ERROR__ALLOC_FAILED = 1
@@ -97,6 +97,13 @@ def test2():
             m.set(0,-2, NK_SOLVE_VERDICT__BLACK),
             NK_SOLVE_ERROR__X_OUT_OF_BOUNDS,
             "X (= -2) is out of bounds",
+        )
+
+    # TEST
+    eq_ok (
+            m.set(3,4, NK_SOLVE_VERDICT__BLACK),
+            NK_SOLVE_ERROR__SUCCESS,
+            "Set in coordinates is successful."
         )
 
     # TEST

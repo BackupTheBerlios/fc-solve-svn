@@ -52,6 +52,9 @@ nk_solve_verdict_matrix_set(
     nk_solve_verdict_t value
     )
 {
+    int pos, offset;
+    char * ptr;
+
     if ( ! ((y >= 0) && (y < board->height)) )
     {
         return NK_SOLVE_ERROR__Y_OUT_OF_BOUNDS;
@@ -62,6 +65,14 @@ nk_solve_verdict_matrix_set(
         return NK_SOLVE_ERROR__X_OUT_OF_BOUNDS;
     }
 
-    return NK_SOLVE_ERROR__ALLOC_FAILED;
+    pos = y * board->width + x;
+    ptr = &(board->buf[pos>>2]);
+    offset = ((pos&(4-1)) << 1);
+
+    /* Assign the proper quarter (2-bits unit). */
+    (*ptr) &= (~ ((4-1)  << offset));
+    (*ptr) |=     (value << offset);
+
+    return NK_SOLVE_ERROR__SUCCESS;
 }
 
