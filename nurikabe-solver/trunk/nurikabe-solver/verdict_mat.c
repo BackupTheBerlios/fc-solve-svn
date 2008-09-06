@@ -34,3 +34,13 @@ nk_solve_verdict_matrix_create(
     return NK_SOLVE_ERROR__SUCCESS;
 }
 
+NK_SOLVE_ERROR_CODE
+nk_solve_verdict_matrix_free(nk_solve_verdict_matrix_t * matrix)
+{
+    g_free(matrix->buf);
+    matrix->buf = 0;
+    g_free(matrix);
+
+    return NK_SOLVE_ERROR__SUCCESS;
+}
+

@@ -35,6 +35,9 @@ nk_solve_verdict_matrix_create(
         );
 
 extern NK_SOLVE_ERROR_CODE
+nk_solve_verdict_matrix_free(nk_solve_verdict_matrix_t * matrix);
+
+extern NK_SOLVE_ERROR_CODE
 nk_solve_verdict_matrix_set(
     nk_solve_verdict_matrix_t * board,
     gint y,
@@ -50,8 +53,6 @@ nk_solve_verdict_matrix_get(
     nk_solve_verdict_t * value
     );
 
-extern NK_SOLVE_ERROR_CODE
-nk_solve_verdict_matrix_free(nk_solve_verdict_matrix_t * matrix);
 
 #endif /* #ifndef NK_SOLVE__VERDICT_MAT_H */
 
