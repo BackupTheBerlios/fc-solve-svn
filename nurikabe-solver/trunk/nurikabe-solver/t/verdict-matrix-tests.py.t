@@ -38,7 +38,7 @@ class Mat:
                 )
 
 
-def test1():
+def test_create_and_free():
     m = Mat()
     # TEST
     eq_ok (
@@ -57,9 +57,9 @@ def test1():
             "nk_solve_verdict_matrix_free was successful"
             )
 
-test1()
+test_create_and_free()
 
-def test2():
+def test_set_and_get():
     m = Mat()
     # TEST
     eq_ok (
@@ -113,4 +113,4 @@ def test2():
             "nk_solve_verdict_matrix_free was successful"
             )
 
-test2()
+test_set_and_get()
