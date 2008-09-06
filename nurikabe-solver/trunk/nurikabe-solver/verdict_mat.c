@@ -56,6 +56,11 @@ nk_solve_verdict_matrix_set(
     {
         return NK_SOLVE_ERROR__Y_OUT_OF_BOUNDS;
     }
+    
+    if ( ! ((x >= 0) && (x < board->width)) )
+    {
+        return NK_SOLVE_ERROR__X_OUT_OF_BOUNDS;
+    }
 
     return NK_SOLVE_ERROR__ALLOC_FAILED;
 }
