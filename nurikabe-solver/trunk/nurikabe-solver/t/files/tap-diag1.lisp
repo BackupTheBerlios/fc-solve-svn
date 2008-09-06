@@ -1,3 +1,4 @@
+(declaim (optimize debug))
 (load "cl-tap.lisp")
 
 (defparameter *tester* (make-instance 'tester))
