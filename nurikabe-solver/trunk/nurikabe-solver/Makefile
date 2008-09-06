@@ -1,5 +1,5 @@
-MODULES = cell_mat.c
-HEADERS = cell_mat.h
+MODULES = verdict_mat.c
+HEADERS = verdict_mat.h
 
 CFLAGS = -g -Wall
 

@@ -1,4 +1,4 @@
-#include "cell_mat.h"
+#include "verdict_mat.h"
 
 NK_SOLVE_ERROR_CODE
 nk_solve_verdict_matrix_create(
