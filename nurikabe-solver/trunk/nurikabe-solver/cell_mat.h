@@ -5,9 +5,9 @@
 
 enum NK_SOLVE_VERDICT
 {
-    NK_SOLVE_VERDICT__UNKNOWN,
-    NK_SOLVE_VERDICT__WHITE,
-    NK_SOLVE_VERDICT__BLACK,
+    NK_SOLVE_VERDICT__UNKNOWN = 0,
+    NK_SOLVE_VERDICT__WHITE = 1,
+    NK_SOLVE_VERDICT__BLACK = 2,
 };
 
 typedef enum 
@@ -49,6 +49,9 @@ nk_solve_verdict_matrix_get(
     gint x,
     nk_solve_verdict_t * value
     );
+
+extern NK_SOLVE_ERROR_CODE
+nk_solve_verdict_matrix_free(nk_solve_verdict_matrix_t * matrix);
 
 #endif /* #ifndef NK_SOLVE__VERDICT_MAT_H */
 
