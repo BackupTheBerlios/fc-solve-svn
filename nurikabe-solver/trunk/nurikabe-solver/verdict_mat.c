@@ -21,7 +21,12 @@ nk_solve_verdict_matrix_create(
     ret->width = width;
     ret->height = height;
 
-    ret->buf = g_malloc0((width*height)>>2);
+    /*
+     * If width*height == 3, then we need one octet to hold
+     * the three quarters.
+     * So it's (width*height)/4+1
+     * */
+    ret->buf = g_malloc0( ((width*height)>>2) + 1 );
     if (! ret->buf)
     {
         g_free(ret);

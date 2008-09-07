@@ -2,7 +2,7 @@
 from TAP.Simple import *
 from ctypes import *
 
-plan(11)
+plan(15)
 
 NK_SOLVE_ERROR__SUCCESS = 0
 NK_SOLVE_ERROR__ALLOC_FAILED = 1
@@ -114,3 +114,33 @@ def test_set_and_get():
             )
 
 test_set_and_get()
+
+def test_off_by_one():
+    m = Mat()
+    # TEST
+    eq_ok (
+            m.create(1, 3), 
+            NK_SOLVE_ERROR__SUCCESS, 
+            "off_by_one create"
+            )
+
+    # TEST
+    ok (m.matrix, "off_by_one matrix is allocated")
+
+    # TEST
+    eq_ok (
+            m.set(0, 2, NK_SOLVE_VERDICT__BLACK),
+            NK_SOLVE_ERROR__SUCCESS,
+            "off_by_one value set.",
+        )
+
+    # TEST
+    eq_ok (
+            m.free(),
+            NK_SOLVE_ERROR__SUCCESS,
+            "off_by_one free was successful"
+            )
+
+
+test_off_by_one()
+
