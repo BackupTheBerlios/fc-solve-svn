@@ -2,7 +2,7 @@
 from TAP.Simple import *
 from ctypes import *
 
-plan(16)
+plan(17)
 
 NK_SOLVE_ERROR__SUCCESS = 0
 NK_SOLVE_ERROR__ALLOC_FAILED = 1
@@ -147,6 +147,13 @@ def test_set_and_get():
             m.get(0,0),
             (NK_SOLVE_ERROR__SUCCESS, NK_SOLVE_VERDICT__UNKNOWN),
             "Get in (0,0) is unknown."
+        )
+
+    # TEST
+    eq_ok (
+            m.get(3,4),
+            (NK_SOLVE_ERROR__SUCCESS, NK_SOLVE_VERDICT__BLACK),
+            "Get in (3,4) is black."
         )
 
     # TEST
