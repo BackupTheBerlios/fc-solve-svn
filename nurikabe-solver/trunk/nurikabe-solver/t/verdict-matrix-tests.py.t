@@ -2,7 +2,7 @@
 from TAP.Simple import *
 from ctypes import *
 
-plan(15)
+plan(16)
 
 NK_SOLVE_ERROR__SUCCESS = 0
 NK_SOLVE_ERROR__ALLOC_FAILED = 1
@@ -37,6 +37,14 @@ class Mat:
                 c_int(v)
                 )
 
+    def get(self, y, x):
+        value = c_int(-1)
+        ret_code = nk_solve.nk_solve_verdict_matrix_get(
+                self.matrix,
+                c_int(y), c_int(x),
+                byref(value)
+                )
+        return (ret_code,value.value)
 
 def test_create_and_free():
     m = Mat()
@@ -91,8 +99,8 @@ def test_set_and_get():
     m = Mat()
     # TEST
     eq_ok (
-            m.create(10, 5), 
-            NK_SOLVE_ERROR__SUCCESS, 
+            m.create(10, 5),
+            NK_SOLVE_ERROR__SUCCESS,
             "nk_solve_verdict_matrix_create correct error value"
             )
 
@@ -132,6 +140,13 @@ def test_set_and_get():
             m.set(3,4, NK_SOLVE_VERDICT__BLACK),
             NK_SOLVE_ERROR__SUCCESS,
             "Set in coordinates is successful."
+        )
+
+    # TEST
+    eq_ok (
+            m.get(0,0),
+            (NK_SOLVE_ERROR__SUCCESS, NK_SOLVE_VERDICT__UNKNOWN),
+            "Get in (0,0) is unknown."
         )
 
     # TEST

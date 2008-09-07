@@ -81,3 +81,33 @@ nk_solve_verdict_matrix_set(
     return NK_SOLVE_ERROR__SUCCESS;
 }
 
+NK_SOLVE_ERROR_CODE
+nk_solve_verdict_matrix_get(
+    nk_solve_verdict_matrix_t * board,
+    gint y,
+    gint x,
+    nk_solve_verdict_t * value
+    )
+{
+    int pos, offset;
+    char * ptr;
+
+    if ( ! ((y >= 0) && (y < board->height)) )
+    {
+        return NK_SOLVE_ERROR__Y_OUT_OF_BOUNDS;
+    }
+    
+    if ( ! ((x >= 0) && (x < board->width)) )
+    {
+        return NK_SOLVE_ERROR__X_OUT_OF_BOUNDS;
+    }
+
+    pos = y * board->width + x;
+    ptr = &(board->buf[pos>>2]);
+    offset = ((pos&(4-1)) << 1);
+
+    *value = (*ptr >> offset) & (4-1);
+
+    return NK_SOLVE_ERROR__SUCCESS;
+}
+
