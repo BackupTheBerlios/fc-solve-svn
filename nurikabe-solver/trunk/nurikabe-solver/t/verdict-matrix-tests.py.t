@@ -2,7 +2,7 @@
 from TAP.Simple import *
 from ctypes import *
 
-plan(20)
+plan(24)
 
 NK_SOLVE_ERROR__SUCCESS = 0
 NK_SOLVE_ERROR__ALLOC_FAILED = 1
@@ -179,10 +179,36 @@ def test_set_and_get():
 
     # TEST
     eq_ok (
+            m.get(12,2),
+            (NK_SOLVE_ERROR__Y_OUT_OF_BOUNDS, -1),
+            "get (12,2) out of y bounds")
+
+    # TEST
+    eq_ok (
+            m.get(-1,2),
+            (NK_SOLVE_ERROR__Y_OUT_OF_BOUNDS, -1),
+            "get (-1,2) out of y bounds")
+ 
+    # TEST
+    eq_ok (
+            m.get(3,100),
+            (NK_SOLVE_ERROR__X_OUT_OF_BOUNDS, -1),
+            "get (3,100) out of x bounds")
+
+    # TEST
+    eq_ok (
+            m.get(2,-1),
+            (NK_SOLVE_ERROR__X_OUT_OF_BOUNDS, -1),
+            "get (2,-1) out of X bounds")
+
+    # TEST
+    eq_ok (
             m.free(),
             NK_SOLVE_ERROR__SUCCESS,
             "nk_solve_verdict_matrix_free was successful"
             )
+
+
 
 test_set_and_get()
 
