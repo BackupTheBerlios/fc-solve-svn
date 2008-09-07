@@ -2,7 +2,7 @@
 from TAP.Simple import *
 from ctypes import *
 
-plan(17)
+plan(20)
 
 NK_SOLVE_ERROR__SUCCESS = 0
 NK_SOLVE_ERROR__ALLOC_FAILED = 1
@@ -137,7 +137,7 @@ def test_set_and_get():
 
     # TEST
     eq_ok (
-            m.set(3,4, NK_SOLVE_VERDICT__BLACK),
+            m.set(3,3, NK_SOLVE_VERDICT__BLACK),
             NK_SOLVE_ERROR__SUCCESS,
             "Set in coordinates is successful."
         )
@@ -151,9 +151,30 @@ def test_set_and_get():
 
     # TEST
     eq_ok (
-            m.get(3,4),
+            m.get(3,3),
             (NK_SOLVE_ERROR__SUCCESS, NK_SOLVE_VERDICT__BLACK),
-            "Get in (3,4) is black."
+            "Get in (3,3) is black."
+        )
+
+    # TEST
+    eq_ok (
+            m.set(3,1, NK_SOLVE_VERDICT__WHITE),
+            NK_SOLVE_ERROR__SUCCESS,
+            "Set in (3,1) is successful."
+        )
+
+    # TEST
+    eq_ok (
+            m.get(3,2),
+            (NK_SOLVE_ERROR__SUCCESS, NK_SOLVE_VERDICT__UNKNOWN),
+            "Get (3,2) (which was not set)"
+        );
+
+    # TEST
+    eq_ok (
+            m.get(3,4),
+            (NK_SOLVE_ERROR__SUCCESS, NK_SOLVE_VERDICT__UNKNOWN),
+            "Get in (3,4) is black. (2nd time)"
         )
 
     # TEST
