@@ -15,6 +15,7 @@ my $builder = Test::Run::Builder->new(
     dist_author         => 'Shlomi Fish <shlomif@cpan.org>',
     dist_version_from   => 'lib/Games/Nurikabe/Solver.pm',
     build_requires => {
+        'Test::Differences' => 0,
         'Test::More' => 0,
     },
     requires =>
