@@ -139,6 +139,19 @@ sub get_cell
     return $self->_cells()->[$y]->[$x];
 }
 
+=head2 $self->get_island($idx)
+
+Returns the Island handle for the index of $idx.
+
+=cut
+
+sub get_island
+{
+    my ($self, $idx) = @_;
+
+    return $self->_islands()->[$idx];
+}
+
 =head1 AUTHOR
 
 Shlomi Fish, C<< <shlomif at cpan.org> >>

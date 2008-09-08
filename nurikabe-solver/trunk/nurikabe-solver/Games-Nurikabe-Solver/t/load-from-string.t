@@ -3,7 +3,9 @@
 use strict;
 use warnings;
 
-use Test::More tests => 4;
+use Test::More tests => 7;
+
+use Test::Differences;
 
 use Games::Nurikabe::Solver::Cell qw($NK_UNKNOWN $NK_WHITE $NK_BLACK);
 use Games::Nurikabe::Solver::Board;
@@ -45,5 +47,18 @@ EOF
     is ($board->get_cell(0,3)->island(),
         0,
         "Island of Cell (0,4) - 0"
+    );
+
+    # TEST
+    is ($board->get_island(0)->idx(), 0, "idx() of island 0 is 0");
+
+    # TEST
+    is ($board->get_island(0)->order(), 1, "order() of island 0 is 1");
+
+    # TEST
+    eq_or_diff (
+        $board->get_island(0)->known_cells(),
+        [[0,3]], 
+        "known_cells of island 0",
     );
 }
