@@ -1,8 +1,15 @@
+# This file is under the MIT X11 License:
+# http://www.opensource.org/licenses/mit-license.php
+
 use strict;
 use warnings;
-use Module::Build;
 
-my $builder = Module::Build->new(
+use File::Spec;
+use lib File::Spec->catdir(File::Spec->curdir(), "inc");
+
+use Test::Run::Builder;
+
+my $builder = Test::Run::Builder->new(
     module_name         => 'Games::Nurikabe::Solver',
     license             => 'mit',
     dist_author         => 'Shlomi Fish <shlomif@cpan.org>',

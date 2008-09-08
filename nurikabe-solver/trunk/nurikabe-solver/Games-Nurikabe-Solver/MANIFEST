@@ -1,14 +1,15 @@
 Build.PL
 Changes
+inc/Test/Run/Builder.pm
 lib/Games/Nurikabe/Solver/Board.pm
 lib/Games/Nurikabe/Solver/Cell.pm
 lib/Games/Nurikabe/Solver/Island.pm
 lib/Games/Nurikabe/Solver.pm
+Makefile.PL
 MANIFEST
+META.yml
 README
 t/00-load.t
 t/load-from-string.t
 t/pod-coverage.t
 t/pod.t
-Makefile.PL
-META.yml
