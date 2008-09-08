@@ -5,7 +5,7 @@ use strict;
 
 =head1 NAME
 
-Games::Nurikabe::Solver - The great new Games::Nurikabe::Solver!
+Games::Nurikabe::Solver - a solver for Nurikabe games.
 
 =head1 VERSION
 
@@ -18,35 +18,17 @@ our $VERSION = '0.01';
 
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
-
-Perhaps a little code snippet.
-
     use Games::Nurikabe::Solver;
 
-    my $foo = Games::Nurikabe::Solver->new();
-    ...
+    my $nurikabe = Games::Nurikabe::Solver->new();
 
-=head1 EXPORT
-
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
+    $nurikabe->load_from_string(<<"EOF")
+    .
+    .
+    .
+    EOF
 
 =head1 FUNCTIONS
-
-=head2 function1
-
-=cut
-
-sub function1 {
-}
-
-=head2 function2
-
-=cut
-
-sub function2 {
-}
 
 =head1 AUTHOR
 
@@ -88,8 +70,11 @@ L<http://cpanratings.perl.org/d/Games-Nurikabe-Solver>
 
 L<http://search.cpan.org/dist/Games-Nurikabe-Solver>
 
-=back
+=item * Version control repository:
 
+L<http://svn.berlios.de/svnroot/repos/fc-solve/nurikabe-solver/trunk/>
+
+=back
 
 =head1 ACKNOWLEDGEMENTS
 
@@ -98,8 +83,7 @@ L<http://search.cpan.org/dist/Games-Nurikabe-Solver>
 
 Copyright 2008 Shlomi Fish, all rights reserved.
 
-This program is released under the following license: mit
-
+This program is released under the following license: MIT/X11 Licence. 
 
 =cut
 
