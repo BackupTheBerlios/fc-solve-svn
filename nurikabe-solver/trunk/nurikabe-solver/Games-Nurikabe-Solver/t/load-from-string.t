@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 7;
+use Test::More tests => 10;
 
 use Test::Differences;
 
@@ -61,4 +61,18 @@ EOF
         [[0,3]], 
         "known_cells of island 0",
     );
+    
+    # TEST
+    is ($board->get_island(2)->idx(), 2, "idx() of island 2 is 2");
+
+    # TEST
+    is ($board->get_island(2)->order(), 2, "order() of island 2 is 2");
+
+    # TEST
+    eq_or_diff (
+        $board->get_island(2)->known_cells(),
+        [[3,3]], 
+        "known_cells of island 2",
+    );
+
 }
