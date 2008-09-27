@@ -6,4 +6,4 @@ BEGIN {
 	use_ok( 'Games::Nurikabe::Solver' );
 }
 
-diag( "Testing Games::Nurikabe::Solver $Games::Nurikabe::Solver::VERSION, Perl $], $^X" );
+# diag( "Testing Games::Nurikabe::Solver $Games::Nurikabe::Solver::VERSION, Perl $], $^X" );
