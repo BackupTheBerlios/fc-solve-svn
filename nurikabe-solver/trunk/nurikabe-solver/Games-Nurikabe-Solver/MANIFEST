@@ -10,6 +10,8 @@ MANIFEST
 META.yml
 README
 t/00-load.t
+t/board-input.t
+t/lib/Games/Nurikabe/Solver/Test/BoardInput.pm
 t/load-from-string.t
 t/pod-coverage.t
 t/pod.t
