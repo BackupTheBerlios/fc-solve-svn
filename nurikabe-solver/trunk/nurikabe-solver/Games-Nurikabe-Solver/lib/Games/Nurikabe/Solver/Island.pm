@@ -34,7 +34,19 @@ __PACKAGE__->mk_accessors(qw(
         }
     );
 
+=cut
 
+sub _sort_coords
+{
+    my $self = shift;
+    my $coords = shift;
+
+    return
+    [ 
+        sort { ($a->[0] <=> $b->[0]) || ($a->[1] <=> $b->[1]) } 
+        @$coords
+    ];
+}
 
 =head1 FUNCTIONS
 
@@ -51,12 +63,7 @@ sub new
     my $self = $class->SUPER::new($args);
 
     $self->idx($args->{idx});
-    $self->known_cells(
-        [ 
-            sort { ($a->[0] <=> $b->[0]) || ($a->[1] <=> $b->[1]) } 
-            @{$args->{known_cells}}
-        ]
-    );
+    $self->known_cells($self->_sort_coords($args->{known_cells}));
 
     return $self;
 }
@@ -115,11 +122,7 @@ sub surround
         }
     }
 
-    return 
-    [ 
-        sort { ($a->[0] <=> $b->[0]) || ($a->[1] <=> $b->[1]) } 
-        @ret
-    ];
+    return $self->_sort_coords(\@ret);
 }
 
 
