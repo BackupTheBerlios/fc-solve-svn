@@ -42,8 +42,8 @@ sub _sort_coords
     my $coords = shift;
 
     return
-    [ 
-        sort { ($a->[0] <=> $b->[0]) || ($a->[1] <=> $b->[1]) } 
+    [
+        sort { ($a->[0] <=> $b->[0]) || ($a->[1] <=> $b->[1]) }
         @$coords
     ];
 }
