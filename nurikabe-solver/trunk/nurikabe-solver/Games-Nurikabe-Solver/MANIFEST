@@ -11,6 +11,7 @@ META.yml
 README
 t/00-load.t
 t/board-input.t
+t/island-surround.t
 t/lib/Games/Nurikabe/Solver/Test/BoardInput.pm
 t/load-from-string.t
 t/pod-coverage.t

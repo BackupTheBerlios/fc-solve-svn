@@ -61,6 +61,7 @@ sub new
     return $self;
 }
 
+
 =head2 $island->idx()
 
 Returns the index of the island.
@@ -72,6 +73,55 @@ Returns an array of [$y,$x] coordinates of the island's known cells.
 =head2 $island->order()
 
 Returns the order (= number of cells) in the island.
+
+=cut
+
+
+=head2 \@black_cells = $island->surround( { board => $board } )
+
+Surround the island of white cells with blacks cells according to the
+geometry of the board $board .
+
+This is useful to find out which black cells should be marked as such after
+the island has been fully discovered.
+
+=cut
+
+sub surround
+{
+    my ($self, $args) = @_;
+
+    my $board = $args->{'board'};
+
+    my %exclude_coords =
+        (map { join(",", @$_) => 1, }
+            @{$self->known_cells()},
+            @{$board->border_exclude_coords()},
+        );
+
+    my @ret;
+    foreach my $cell (@{$self->known_cells()})
+    {
+        foreach my $offset ([-1,0],[0,-1],[0,1],[1,0])
+        {
+            my $to_check = [$cell->[0]+$offset->[0], $cell->[1]+$offset->[1]];
+            my $s = join(",",@$to_check);
+            if (!exists($exclude_coords{$s}))
+            {
+                push @ret, $to_check;
+                # Make sure we don't repeat ourselves
+                $exclude_coords{$s} = 1;
+            }
+        }
+    }
+
+    return 
+    [ 
+        sort { ($a->[0] <=> $b->[0]) || ($a->[1] <=> $b->[1]) } 
+        @ret
+    ];
+}
+
 
 =head1 AUTHOR
 

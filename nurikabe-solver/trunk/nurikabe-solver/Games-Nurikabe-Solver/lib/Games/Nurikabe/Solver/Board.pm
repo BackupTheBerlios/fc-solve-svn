@@ -152,6 +152,24 @@ sub get_island
     return $self->_islands()->[$idx];
 }
 
+=head2 \@coords = $self->border_exclude_coords()
+
+Returns the coordinates of the cells directly outside the board's borders so
+they can be excluded. 
+
+=cut
+
+sub border_exclude_coords
+{
+    my $self = shift;
+
+    return
+    [
+        (map { [-1,$_],[$self->_height(),$_] } (0 .. $self->_width() - 1)),
+        (map { [$_,-1],[$_,$self->_width()] } (0 .. $self->_height() - 1)),
+    ];
+}
+
 =head1 AUTHOR
 
 Shlomi Fish, C<< <shlomif at cpan.org> >>
