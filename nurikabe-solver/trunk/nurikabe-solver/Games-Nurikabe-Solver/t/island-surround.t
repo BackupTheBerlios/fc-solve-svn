@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 5;
+use Test::More tests => 6;
 
 use Test::Differences;
 
@@ -153,5 +153,27 @@ EOF
     is_island_surround(
         $board_s, 
         "Sorrounded Cells for a corner 2*2."
+    );
+}
+
+{
+    my $board_s = <<'EOF';
++------------+
+|WB          |
+|WWB         |
+|BWBB        |
+|BWWWB       |
+|BWBB        |
+| B          |
+|            |
+|            |
+|            |
++------------+
+EOF
+
+    # TEST
+    is_island_surround(
+        $board_s,
+        "Sorrounded Cells - corner squiglly", 
     );
 }
