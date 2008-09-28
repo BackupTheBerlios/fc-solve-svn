@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 2;
+use Test::More tests => 3;
 
 use Test::Differences;
 
@@ -90,5 +90,24 @@ EOF
     is_island_surround(
         $board_s, 
         "Sorrounded Cells for an 5-Island"
+    );
+}
+
+{
+    my $board_s = <<'EOF';
++--------------------+
+|                    |
+|    BBBBBBBBBB      |
+|   BWWWWWWWWWWB     |
+|    BBBBBBBBBB      |
+|                    |
+|                    |
++--------------------+
+EOF
+
+    # TEST
+    is_island_surround(
+        $board_s, 
+        "Sorrounded Cells for a long straight 10-Island"
     );
 }
