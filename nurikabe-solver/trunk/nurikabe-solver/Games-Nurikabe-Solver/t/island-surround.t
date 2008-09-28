@@ -69,8 +69,8 @@ EOF
 
     # TEST
     is_island_surround(
-        $board_s, 
-        "Sorrounded Cells for an L Shape Island"
+        $board_s,
+        "Surrounded Cells for an L Shape Island"
     );
 }
 
@@ -88,8 +88,8 @@ EOF
 
     # TEST
     is_island_surround(
-        $board_s, 
-        "Sorrounded Cells for an 5-Island"
+        $board_s,
+        "Surrounded Cells for an 5-Island"
     );
 }
 
@@ -107,8 +107,8 @@ EOF
 
     # TEST
     is_island_surround(
-        $board_s, 
-        "Sorrounded Cells for a long straight 10-Island"
+        $board_s,
+        "Surrounded Cells for a long straight 10-Island"
     );
 }
 
@@ -129,8 +129,8 @@ EOF
 
     # TEST
     is_island_surround(
-        $board_s, 
-        "Sorrounded Cells for a vertical edgy 4-straight"
+        $board_s,
+        "Surrounded Cells for a vertical edgy 4-straight"
     );
 }
 
@@ -151,8 +151,8 @@ EOF
 
     # TEST
     is_island_surround(
-        $board_s, 
-        "Sorrounded Cells for a corner 2*2."
+        $board_s,
+        "Surrounded Cells for a corner 2*2."
     );
 }
 
@@ -174,6 +174,6 @@ EOF
     # TEST
     is_island_surround(
         $board_s,
-        "Sorrounded Cells - corner squiglly", 
+        "Surrounded Cells - corner squiglly",
     );
 }
