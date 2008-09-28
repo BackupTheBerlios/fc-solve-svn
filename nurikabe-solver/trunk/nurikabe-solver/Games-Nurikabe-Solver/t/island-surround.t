@@ -15,17 +15,10 @@ use Games::Nurikabe::Solver::Cell qw($NK_UNKNOWN $NK_WHITE $NK_BLACK);
 use Games::Nurikabe::Solver::Board;
 use Games::Nurikabe::Solver::Island;
 
+sub is_island_surround
 {
-    my $board_s = <<'EOF';
-+--------------------+
-|                 BBB|
-|                BWWW|
-|                 BBW|
-|                   B|
-|                    |
-|                    |
-+--------------------+
-EOF
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+    my ($board_s, $blurb) = @_;
 
     my $bi = BoardInput->from_s($board_s);
 
@@ -55,10 +48,28 @@ EOF
             }
         );
 
-    # TEST
-    eq_or_diff(
+    return eq_or_diff(
         $got_surrounded_cells,
         $bi->positions("B"),
+        $blurb
+    );
+}
+
+{
+    my $board_s = <<'EOF';
++--------------------+
+|                 BBB|
+|                BWWW|
+|                 BBW|
+|                   B|
+|                    |
+|                    |
++--------------------+
+EOF
+
+    # TEST
+    is_island_surround(
+        $board_s, 
         "Sorrounded Cells for an L Shape Island"
     );
 }
