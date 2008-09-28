@@ -27,7 +27,7 @@ EOF
     is ($b->height(), 2, "Height is 2");
 
     # TEST
-    eq_or_diff ($b->positions("1"), [[0,1],[0,2],[1,0]]);
+    eq_or_diff ($b->positions("1"), [[0,1],[0,2],[1,0]], "1 positions");
 }
 
 {
@@ -49,14 +49,14 @@ EOF
     is ($b->height(), 4, "Height is 4");
 
     # TEST
-    eq_or_diff ($b->positions("1"), [[0,1],[1,0]]);
+    eq_or_diff ($b->positions("1"), [[0,1],[1,0]], "1 positions");
 
     # TEST
-    eq_or_diff ($b->positions("2"), [[0,2],[2,1]]);
+    eq_or_diff ($b->positions("2"), [[0,2],[2,1]], "2 positions");
 
     # TEST
-    eq_or_diff ($b->positions("3"), [[0,0],[3,3]]);
+    eq_or_diff ($b->positions("3"), [[0,0],[3,3]], "3 positions");
 
     # TEST
-    eq_or_diff ($b->positions("4"), [[3,0]]);
+    eq_or_diff ($b->positions("4"), [[3,0]], "4 positions");
 }
