@@ -63,13 +63,15 @@ sub do_test_run_tests
 
 sub ACTION_tags
 {
+    my $self = shift;
     return 
         system(qw(
             ctags -f tags --recurse --totals
-    		--exclude=blib/ --exclude=t/lib
-    		--exclude=.svn --exclude='*~'
-    		--languages=Perl --langmap=Perl:+.t
-    ));
+    		--exclude=blib/** --exclude=t/lib/**
+    		--exclude=**/.svn/** --exclude='*~'),
+            "--exclude=".$self->dist_name()."-*/**",
+            qw(--languages=Perl --langmap=Perl:+.t)
+        );
 }
 
 1;
