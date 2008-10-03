@@ -7,6 +7,7 @@ use base 'Class::Accessor';
 
 use Games::Nurikabe::Solver::Cell qw($NK_UNKNOWN $NK_WHITE $NK_BLACK);
 use Games::Nurikabe::Solver::Island;
+use Games::Nurikabe::Solver::Move;
 
 =head1 NAME
 
@@ -168,6 +169,52 @@ sub border_exclude_coords
         (map { [-1,$_],[$self->_height(),$_] } (0 .. $self->_width() - 1)),
         (map { [$_,-1],[$_,$self->_width()] } (0 .. $self->_height() - 1)),
     ];
+}
+
+sub _solve_using_surround_island
+{
+    my $self = shift;
+
+    my @moves;
+
+    foreach my $island (@{$self->_islands()})
+    {
+        if ($island->order() == @{$island->known_cells()})
+        {
+            my $black_cells = $island->surround({ board => $self });
+
+            my @marked_cells;
+
+            foreach my $coords (@$black_cells)
+            {
+                my $cell = $self->get_cell(@$coords);
+                if ($cell->status() eq $NK_WHITE)
+                {
+                    die "Cell ($coords->[0],$coords->[1]) should be black but it's white";
+                }
+                elsif ($cell->status eq $NK_BLACK)
+                {
+                    # Do nothing.
+                }
+                else
+                {
+                    $cell->status($NK_BLACK);
+                    push @marked_cells, $coords;
+                }
+            }
+            
+            push @moves,
+                Games::Nurikabe::Solver::Move->new(
+                    {
+                        reason => "surround_island_when_full",
+                        verdict_cells => {$NK_BLACK => \@marked_cells,},
+                        reason_params => { island => $island->idx(), },
+                    }
+                );
+        }
+    }
+
+    return \@moves;
 }
 
 =head1 AUTHOR

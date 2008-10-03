@@ -19,3 +19,4 @@ t/load-from-string.t
 t/move1.t
 t/pod-coverage.t
 t/pod.t
+t/solve1.t
