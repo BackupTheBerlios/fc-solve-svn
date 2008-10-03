@@ -22,25 +22,27 @@ EOF
             $string_representation
         );
 
-    my $moves = $board->_solve_using_surround_island({});
+    {
+        my $moves = $board->_solve_using_surround_island({});
 
-    # TEST
-    is (scalar(@$moves), 1, "There is 1 move");
+        # TEST
+        is (scalar(@$moves), 1, "There is 1 move");
 
-    my $m = $moves->[0];
+        my $m = $moves->[0];
 
-    # TEST
-    is ($m->reason(), "surround_island_when_full", "reason is OK.");
+        # TEST
+        is ($m->reason(), "surround_island_when_full", "reason is OK.");
 
-    # TEST
-    eq_or_diff(
-        $m->get_verdict_cells($NK_BLACK),
-        [[0,1],[1,0]],
-        "Verdicted cells is OK.",
-    );
+        # TEST
+        eq_or_diff(
+            $m->get_verdict_cells($NK_BLACK),
+            [[0,1],[1,0]],
+            "Verdicted cells is OK.",
+        );
 
-    # TEST
-    is ($m->reason_param("island"), 0,
-        "The island is 0 in the reason parameter",
-    );
+        # TEST
+        is ($m->reason_param("island"), 0,
+            "The island is 0 in the reason parameter",
+        );
+    }
 }
