@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 3;
+use Test::More tests => 5;
 
 use Test::Differences;
 
@@ -36,5 +36,24 @@ use Games::Nurikabe::Solver::Move;
     # TEST
     is ($move->reason_param("island"), 0,
         "The island is 0 in the reason parameter",
+    );
+}
+
+{
+    my $move = Games::Nurikabe::Solver::Move->new(
+        {
+            reason => "surrounded_by_blacks",
+            verdict_cells => {$NK_BLACK => [[1,1]]},
+        }
+    );
+
+    # TEST
+    is ($move->reason(), "surrounded_by_blacks", "->reason is OK.");
+
+    # TEST
+    eq_or_diff(
+        $move->get_verdict_cells($NK_BLACK),
+        [[1,1]],
+        "Verdicted cells is OK.",
     );
 }
