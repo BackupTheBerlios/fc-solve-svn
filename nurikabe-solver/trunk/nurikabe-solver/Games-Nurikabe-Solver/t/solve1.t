@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 4;
+use Test::More tests => 7;
 
 use Test::Differences;
 
@@ -43,6 +43,25 @@ EOF
         # TEST
         is ($m->reason_param("island"), 0,
             "The island is 0 in the reason parameter",
+        );
+    }
+
+    {
+        my $moves = $board->_solve_using_surrounded_by_blacks({});
+
+        # TEST
+        is (scalar(@$moves), 1, "There is 1 move");
+
+        my $m = $moves->[0];
+
+        # TEST
+        is ($m->reason(), "surrounded_by_blacks", "reason is OK.");
+
+        # TEST
+        eq_or_diff(
+            $m->get_verdict_cells($NK_BLACK),
+            [[1,1]],
+            "Verdicted cells is OK.",
         );
     }
 }

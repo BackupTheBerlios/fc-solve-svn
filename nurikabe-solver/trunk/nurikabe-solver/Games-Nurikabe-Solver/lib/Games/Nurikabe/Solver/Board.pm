@@ -3,6 +3,8 @@ package Games::Nurikabe::Solver::Board;
 use warnings;
 use strict;
 
+use List::MoreUtils qw(all);
+
 use base 'Class::Accessor';
 
 use Games::Nurikabe::Solver::Cell qw($NK_UNKNOWN $NK_WHITE $NK_BLACK);
@@ -211,6 +213,72 @@ sub _solve_using_surround_island
                         reason_params => { island => $island->idx(), },
                     }
                 );
+        }
+    }
+
+    return \@moves;
+}
+
+sub _calc_vicinity
+{
+    my ($self, $y, $x) = @_;
+
+    my @ret;
+
+    if ($y > 0)
+    {
+        push @ret, [$y-1,$x];
+    }
+
+    if ($x > 0)
+    {
+        push @ret, [$y,$x-1];
+    }
+
+    if ($x+1 < $self->_width())
+    {
+        push @ret, [$y, $x+1];
+    }
+
+    if ($y+1 < $self->_height())
+    {
+        push @ret, [$y+1, $x];
+    }
+
+    return \@ret;
+}
+
+sub _solve_using_surrounded_by_blacks
+{
+    my $self = shift;
+
+    my @moves;
+
+    foreach my $y (0 .. ($self->_height()-1))
+    {
+        X_LOOP:
+        foreach my $x (0 .. ($self->_width()-1))
+        {
+            # We're only interested in unknowns.
+            if ($self->get_cell($y,$x)->status() ne $NK_UNKNOWN)
+            {
+                next X_LOOP;
+            }
+            if (all { $self->get_cell(@$_)->status() eq $NK_BLACK }
+                (@{$self->_calc_vicinity($y,$x)})
+            )
+            {
+                # We got an unknown cell that's entirely surrounded by blacks -
+                # let's do our thing.
+                $self->get_cell($y,$x)->status($NK_BLACK);
+                push @moves,
+                    Games::Nurikabe::Solver::Move->new(
+                        {
+                            reason => "surrounded_by_blacks",
+                            verdict_cells => {$NK_BLACK => [[$y,$x]]},
+                        }
+                    );
+            }
         }
     }
 
