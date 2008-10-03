@@ -5,7 +5,7 @@ use warnings;
 
 use Games::Nurikabe::Solver::Board;
 
-use Test::More tests => 1;
+use Test::More tests => 3;
 
 use Test::Differences;
 
@@ -29,5 +29,19 @@ EOF
         $board->_calc_vicinity(1,1),
         [[0,1],[1,0],[1,2],[2,1]],
         "Simple calc vicinity - 1,1",
+    );
+
+    # TEST
+    eq_or_diff(
+        $board->_calc_vicinity(4,3),
+        [[3,3],[4,2],[4,4]],
+        "calc vicinity bottom - 4,3",
+    );
+
+    # TEST
+    eq_or_diff(
+        $board->_calc_vicinity(0,0),
+        [[0,1],[1,0]],
+        "calc vicinity corner - 0,0",
     );
 }
