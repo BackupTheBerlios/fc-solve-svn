@@ -1,9 +1,11 @@
 Build.PL
 Changes
 inc/Test/Run/Builder.pm
+lib/Games/Nurikabe/Solver/Base.pm
 lib/Games/Nurikabe/Solver/Board.pm
 lib/Games/Nurikabe/Solver/Cell.pm
 lib/Games/Nurikabe/Solver/Island.pm
+lib/Games/Nurikabe/Solver/Move.pm
 lib/Games/Nurikabe/Solver.pm
 Makefile.PL
 MANIFEST
@@ -14,5 +16,6 @@ t/board-input.t
 t/island-surround.t
 t/lib/Games/Nurikabe/Solver/Test/BoardInput.pm
 t/load-from-string.t
+t/move1.t
 t/pod-coverage.t
 t/pod.t
