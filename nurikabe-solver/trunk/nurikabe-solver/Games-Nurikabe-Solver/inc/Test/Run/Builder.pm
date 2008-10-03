@@ -65,8 +65,9 @@ sub ACTION_tags
 {
     my $self = shift;
     return 
-        system(qw(
-            ctags -f tags --recurse --totals
+        $self->do_system(
+            "ctags",
+            qw(-f tags --recurse --totals
     		--exclude=blib/** --exclude=t/lib/**
     		--exclude=**/.svn/** --exclude='*~'),
             "--exclude=".$self->dist_name()."-*/**",
