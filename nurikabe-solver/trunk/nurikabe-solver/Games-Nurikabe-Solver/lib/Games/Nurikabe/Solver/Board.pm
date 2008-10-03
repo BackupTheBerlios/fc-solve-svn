@@ -25,9 +25,10 @@ our $VERSION = '0.01';
 
 __PACKAGE__->mk_accessors(qw(
     _cells
-    _islands
-    _width
     _height
+    _islands
+    _verdict_marked_cells
+    _width
     ));
 
 =head1 SYNOPSIS
@@ -43,6 +44,50 @@ __PACKAGE__->mk_accessors(qw(
     EOF
 
 =head1 FUNCTIONS
+
+=head2 $class->new()
+
+Should not be used directly.
+
+=cut
+
+sub _get_init_verdict_marked_cells
+{
+    my $self = shift;
+
+    return {$NK_BLACK => [], $NK_WHITE => [],}
+}
+
+sub _clear_verdict_marked_cells
+{
+    my $self = shift;
+
+    $self->_verdict_marked_cells($self->_get_init_verdict_marked_cells());
+
+    return;
+}
+
+sub _flush_verdict_marked_cells
+{
+    my $self = shift;
+
+    my $ret = $self->_verdict_marked_cells();
+
+    $self->_clear_verdict_marked_cells();
+
+    return $ret;
+}
+
+sub new
+{
+    my $class = shift;
+
+    my $self = $class->SUPER::new(@_);
+
+    $self->_clear_verdict_marked_cells();
+
+    return $self;
+}
 
 =head2 $class->load_from_string($string)
 
@@ -173,6 +218,39 @@ sub border_exclude_coords
     ];
 }
 
+sub _actual_mark
+{
+    my ($self, $y, $x, $verdict) = @_;
+
+    $self->get_cell($y,$x,)->status($verdict);
+
+    push @{$self->_verdict_marked_cells()->{$verdict}},
+        [$y,$x]
+        ;
+
+    return;
+}
+
+sub _mark_as_black
+{
+    my ($self, $y, $x) = @_;
+
+    my $cell = $self->get_cell($y,$x);
+
+    if ($cell->status() eq $NK_WHITE)
+    {
+        die "Cell ($y,$x) should not be white but it is";
+    }
+
+    if ($cell->status() eq $NK_BLACK)
+    {
+        # Do nothing - it's already black.
+        return;
+    }
+
+    return $self->_actual_mark($y,$x,$NK_BLACK);
+}
+
 sub _solve_using_surround_island
 {
     my $self = shift;
@@ -185,31 +263,16 @@ sub _solve_using_surround_island
         {
             my $black_cells = $island->surround({ board => $self });
 
-            my @marked_cells;
-
             foreach my $coords (@$black_cells)
             {
-                my $status = $self->get_cell(@$coords)->status();
-                if ($status eq $NK_WHITE)
-                {
-                    die "Cell ($coords->[0],$coords->[1]) should be black but it's white";
-                }
-                elsif ($status eq $NK_BLACK)
-                {
-                    # Do nothing.
-                }
-                else
-                {
-                    $self->get_cell(@$coords)->status($NK_BLACK);
-                    push @marked_cells, $coords;
-                }
+                $self->_mark_as_black(@$coords);
             }
             
             push @moves,
                 Games::Nurikabe::Solver::Move->new(
                     {
                         reason => "surround_island_when_full",
-                        verdict_cells => {$NK_BLACK => \@marked_cells,},
+                        verdict_cells => $self->_flush_verdict_marked_cells(),
                         reason_params => { island => $island->idx(), },
                     }
                 );
@@ -264,18 +327,20 @@ sub _solve_using_surrounded_by_blacks
             {
                 next X_LOOP;
             }
+
             if (all { $self->get_cell(@$_)->status() eq $NK_BLACK }
                 (@{$self->_calc_vicinity($y,$x)})
             )
             {
                 # We got an unknown cell that's entirely surrounded by blacks -
                 # let's do our thing.
-                $self->get_cell($y,$x)->status($NK_BLACK);
+                $self->_mark_as_black($y,$x);
                 push @moves,
                     Games::Nurikabe::Solver::Move->new(
                         {
                             reason => "surrounded_by_blacks",
-                            verdict_cells => {$NK_BLACK => [[$y,$x]]},
+                            verdict_cells =>
+                                $self->_flush_verdict_marked_cells(),
                         }
                     );
             }
