@@ -189,18 +189,18 @@ sub _solve_using_surround_island
 
             foreach my $coords (@$black_cells)
             {
-                my $cell = $self->get_cell(@$coords);
-                if ($cell->status() eq $NK_WHITE)
+                my $status = $self->get_cell(@$coords)->status();
+                if ($status eq $NK_WHITE)
                 {
                     die "Cell ($coords->[0],$coords->[1]) should be black but it's white";
                 }
-                elsif ($cell->status eq $NK_BLACK)
+                elsif ($status eq $NK_BLACK)
                 {
                     # Do nothing.
                 }
                 else
                 {
-                    $cell->status($NK_BLACK);
+                    $self->get_cell(@$coords)->status($NK_BLACK);
                     push @marked_cells, $coords;
                 }
             }
