@@ -79,6 +79,15 @@ sub _flush_verdict_marked_cells
     return $ret;
 }
 
+sub _exist_verdict_marked_cells
+{
+    my $self = shift;
+
+    return @{$self->_verdict_marked_cells->{$NK_BLACK}} ||
+           @{$self->_verdict_marked_cells->{$NK_WHITE}}
+        ;
+}
+
 sub _flush_moves
 {
     my $self = shift;
@@ -237,13 +246,16 @@ sub _add_move
     my $self = shift;
     my $args = shift;
 
-    push @{$self->_moves()},
-        Games::Nurikabe::Solver::Move->new(
-            {
-                verdict_cells => $self->_flush_verdict_marked_cells(),
-                %$args,
-            },
-        );
+    if ($self->_exist_verdict_marked_cells())
+    {
+        push @{$self->_moves()},
+            Games::Nurikabe::Solver::Move->new(
+                {
+                    verdict_cells => $self->_flush_verdict_marked_cells(),
+                    %$args,
+                },
+            );
+    }
 
     return;
 }
@@ -440,24 +452,22 @@ sub _adj_whites_handle_shape
             ];
             $self->_mark_as_black(@$b_coords);
         }
-        if (@{$self->_verdict_marked_cells()->{$NK_BLACK}})
-        {
-            $self->_add_move(
+
+        $self->_add_move(
+            {
+                reason => "adjacent_whites",
+                reason_params =>
                 {
-                    reason => "adjacent_whites",
-                    reason_params =>
-                    {
-                        base_coords => [@$c],
-                        offset => [@$offset],
-                        islands =>
-                        [
-                            $cell->island(),
-                            $other_cell->island(),
-                        ],
-                    },
-                }
-            );
-        }
+                    base_coords => [@$c],
+                    offset => [@$offset],
+                    islands =>
+                    [
+                        $cell->island(),
+                        $other_cell->island(),
+                    ],
+                },
+            }
+        );
     }
 
     return;
