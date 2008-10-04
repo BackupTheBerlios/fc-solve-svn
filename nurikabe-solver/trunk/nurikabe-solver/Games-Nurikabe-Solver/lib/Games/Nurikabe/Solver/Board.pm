@@ -407,6 +407,61 @@ sub _solve_using_surrounded_by_blacks
     return $self->_flush_moves();
 }
 
+sub _adj_whites_handle_shape
+{
+    my ($self, $c, $cell, $shape) = @_;
+
+    my $offset = $shape->{'offset'};
+    my $blacks_offsets = $shape->{'blacks'};
+
+    # Other X and Other Y
+    my $other_coords =
+    [
+        $c->[0] + $offset->[0],
+        $c->[1] + $offset->[1]
+    ];
+    
+    if ($self->_is_in_bounds(@$other_coords))
+    {
+        my $other_cell = $self->get_cell(@$other_coords);
+        
+        if (   $other_cell->belongs_to_island()
+            && ($other_cell->island() != $cell->island()))
+        {
+            # Bingo.
+            foreach my $b_off (@$blacks_offsets)
+            {
+                my $b_coords =
+                [
+                    $c->[0] + $b_off->[0],
+                    $c->[1] + $b_off->[1]
+                ];
+                $self->_mark_as_black(@$b_coords);
+            }
+            if (@{$self->_verdict_marked_cells()->{$NK_BLACK}})
+            {
+                $self->_add_move(
+                    {
+                        reason => "adjacent_whites",
+                        reason_params =>
+                        {
+                            base_coords => [@$c],
+                            offset => [@$offset],
+                            islands =>
+                            [
+                                $cell->island(),
+                                $other_cell->island(),
+                            ],
+                        },
+                    }
+                );
+            }
+        }
+    }
+
+    return;
+}
+
 sub _solve_using_adjacent_whites
 {
     my $self = shift;
@@ -443,53 +498,7 @@ sub _solve_using_adjacent_whites
 
             foreach my $shape (@shapes)
             {
-                my $offset = $shape->{'offset'};
-                my $blacks_offsets = $shape->{'blacks'};
-
-                # Other X and Other Y
-                my $other_coords =
-                [
-                    $c->[0] + $offset->[0],
-                    $c->[1] + $offset->[1]
-                ];
-                
-                if ($self->_is_in_bounds(@$other_coords))
-                {
-                    my $other_cell = $self->get_cell(@$other_coords);
-                    
-                    if (   $other_cell->belongs_to_island()
-                        && ($other_cell->island() != $cell->island()))
-                    {
-                        # Bingo.
-                        foreach my $b_off (@$blacks_offsets)
-                        {
-                            my $b_coords =
-                            [
-                                $c->[0] + $b_off->[0],
-                                $c->[1] + $b_off->[1]
-                            ];
-                            $self->_mark_as_black(@$b_coords);
-                        }
-                        if (@{$self->_verdict_marked_cells()->{$NK_BLACK}})
-                        {
-                            $self->_add_move(
-                                {
-                                    reason => "adjacent_whites",
-                                    reason_params =>
-                                    {
-                                        base_coords => [@$c],
-                                        offset => [@$offset],
-                                        islands =>
-                                        [
-                                            $cell->island(),
-                                            $other_cell->island(),
-                                        ],
-                                    },
-                                }
-                            );
-                        }
-                    }
-                }
+                $self->_adj_whites_handle_shape($c, $cell, $shape);
             }
         }
     );
