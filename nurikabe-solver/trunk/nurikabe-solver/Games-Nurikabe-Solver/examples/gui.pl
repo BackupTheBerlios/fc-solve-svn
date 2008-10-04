@@ -9,6 +9,7 @@ package NurikabeCanvas;
 
 use Wx ':everything';
 use Wx::Event qw(EVT_PAINT);
+
 use base 'Wx::Window';
 
 use Games::Nurikabe::Solver::Board;
@@ -116,10 +117,25 @@ sub OnPaint
     }
 }
 
+sub perform_solve
+{
+    my $self = shift;
+    my $move = shift;
+
+    my $method = "_solve_using_$move";
+
+    $self->{board}->$method();
+
+    $self->OnPaint();
+
+    return;
+}
+
 package NurikabeApp;
 
 use base 'Wx::App';
 use Wx ':everything';
+use Wx::Event qw(EVT_LISTBOX_DCLICK);
 
 sub new
 {
@@ -163,8 +179,19 @@ sub OnInit
 
     $self->{frame} = $frame;
 
+    EVT_LISTBOX_DCLICK($frame->{list}, wxID_ANY(), sub {
+            my $list = shift;
+            my $event = shift;
+
+            my $sel = $event->GetSelection();
+            my $string = $list->GetString($sel);
+            $frame->{board}->perform_solve($string);
+        }
+    );
+
     return 1;
 }
+
 
 sub assign_filename
 {
