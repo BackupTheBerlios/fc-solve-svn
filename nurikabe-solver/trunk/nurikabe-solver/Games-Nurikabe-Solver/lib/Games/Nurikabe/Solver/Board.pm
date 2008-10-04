@@ -311,6 +311,17 @@ sub _calc_vicinity
     return \@ret;
 }
 
+sub _is_in_bounds
+{
+    my ($self, $y, $x) = @_;
+
+    return
+        (
+            ($y >= 0) && ($y < $self->_height())
+         && ($x >= 0) && ($x < $self->_width())
+        );
+}
+
 sub _solve_using_surrounded_by_blacks
 {
     my $self = shift;
@@ -343,6 +354,72 @@ sub _solve_using_surrounded_by_blacks
                                 $self->_flush_verdict_marked_cells(),
                         }
                     );
+            }
+        }
+    }
+
+    return \@moves;
+}
+
+sub _solve_using_adjacent_whites
+{
+    my $self = shift;
+
+    my @moves;
+
+    foreach my $y (0 .. ($self->_height()-1))
+    {
+        X_LOOP:
+        foreach my $x (0 .. ($self->_width()-1))
+        {
+            my $cell = $self->get_cell($y,$x);
+
+            if (! (($cell->status() eq $NK_WHITE) && defined($cell->island())))
+            {
+                next X_LOOP;
+            }
+
+            my $offset = [1,1];
+            my $blacks_offsets = [[0,1],[1,0]];
+
+            # Other X and Other Y
+            my $other_coords = [$y + $offset->[0], $x + $offset->[1]];
+            
+            if ($self->_is_in_bounds(@$other_coords))
+            {
+                my $other_cell = $self->get_cell(@$other_coords);
+                
+                if (   ($other_cell->status() eq $NK_WHITE)
+                    && defined($other_cell->island())
+                    && ($other_cell->island() != $cell->island()))
+                {
+                    # Bingo.
+                    foreach my $b_off (@$blacks_offsets)
+                    {
+                        my $b_coords = [$y + $b_off->[0], $x + $b_off->[1]];
+                        $self->_mark_as_black(@$b_coords);
+                    }
+                    if (@{$self->_verdict_marked_cells()->{$NK_BLACK}})
+                    {
+                        push @moves,
+                            Games::Nurikabe::Solver::Move->new(
+                                {
+                                    reason => "adjacent_whites",
+                                    verdict_cells => $self->_flush_verdict_marked_cells(),
+                                    reason_params =>
+                                    {
+                                        base_coords => [$y,$x],
+                                        offset => [@$offset],
+                                        islands =>
+                                        [
+                                            $cell->island(),
+                                            $other_cell->island(),
+                                        ],
+                                    },
+                                }
+                            );
+                    }
+                }
             }
         }
     }
@@ -407,4 +484,4 @@ This program is released under the following license: MIT/X11 Licence.
 
 =cut
 
-1; # End of Games::Nurikabe::Solver
+1; # End of Games::Nurikabe::Solver::Board
