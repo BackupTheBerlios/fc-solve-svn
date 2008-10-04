@@ -25,8 +25,8 @@ sub is_island_surround
     my $board =
         Games::Nurikabe::Solver::Board->new(
             {
-                _width => $bi->width(),
-                _height => $bi->height(),
+                width => $bi->width(),
+                height => $bi->height(),
             }
         );
 

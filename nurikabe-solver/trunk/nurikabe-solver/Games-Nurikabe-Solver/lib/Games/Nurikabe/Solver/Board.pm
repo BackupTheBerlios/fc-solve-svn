@@ -5,7 +5,7 @@ use strict;
 
 use List::MoreUtils qw(all);
 
-use base 'Class::Accessor';
+use base 'Games::Nurikabe::Solver::Base';
 
 use Games::Nurikabe::Solver::Cell qw($NK_UNKNOWN $NK_WHITE $NK_BLACK);
 use Games::Nurikabe::Solver::Island;
@@ -99,17 +99,19 @@ sub _flush_moves
     return $ret;
 }
 
-sub new
+sub _init
 {
-    my $class = shift;
+    my $self = shift;
+    my $args = shift;
 
-    my $self = $class->SUPER::new(@_);
+    $self->_width($args->{width});
+    $self->_height($args->{height});
 
     $self->_clear_verdict_marked_cells();
 
     $self->_moves([]);
 
-    return $self;
+    return 0;
 }
 
 =head2 $class->load_from_string($string)
@@ -136,10 +138,7 @@ sub load_from_string
     }
     my ($width, $height) = ($1, $2);
 
-    my $self = $class->new();
-
-    $self->_width($width);
-    $self->_height($height);
+    my $self = $class->new({width => $width, height => $height});
 
     my @cells;
     my @islands;
@@ -426,12 +425,8 @@ sub _adj_whites_handle_shape
     my $offset = $shape->{'offset'};
     my $blacks_offsets = $shape->{'blacks'};
 
-    # Other X and Other Y
-    my $other_coords =
-    [
-        $c->[0] + $offset->[0],
-        $c->[1] + $offset->[1]
-    ];
+    # Other [X,Y] 
+    my $other_coords = $self->add_offset($c, $offset);
     
     if (! $self->_is_in_bounds(@$other_coords))
     {
@@ -445,12 +440,7 @@ sub _adj_whites_handle_shape
         # Bingo.
         foreach my $b_off (@$blacks_offsets)
         {
-            my $b_coords =
-            [
-                $c->[0] + $b_off->[0],
-                $c->[1] + $b_off->[1]
-            ];
-            $self->_mark_as_black(@$b_coords);
+            $self->_mark_as_black(@{$self->add_offset($c, $b_off)});
         }
 
         $self->_add_move(

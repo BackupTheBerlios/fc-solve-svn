@@ -3,7 +3,7 @@ package Games::Nurikabe::Solver::Island;
 use strict;
 use warnings;
 
-use base 'Class::Accessor';
+use base 'Games::Nurikabe::Solver::Base';
 
 =head1 NAME
 
@@ -30,7 +30,8 @@ __PACKAGE__->mk_accessors(qw(
     my $nurikabe = Games::Nurikabe::Island->new(
         {
             idx => $index,
-            known_cells => $index,
+            known_cells => [@coords],
+            order => 3,
         }
     );
 
@@ -56,16 +57,15 @@ Initialises a new island.
 
 =cut
 
-sub new
+sub _init
 {
-    my ($class, $args) = @_;
-
-    my $self = $class->SUPER::new($args);
+    my ($self, $args) = @_;
 
     $self->idx($args->{idx});
     $self->known_cells($self->_sort_coords($args->{known_cells}));
+    $self->order($args->{order});
 
-    return $self;
+    return 0;
 }
 
 
@@ -111,8 +111,9 @@ sub surround
     {
         foreach my $offset ([-1,0],[0,-1],[0,1],[1,0])
         {
-            my $to_check = [$cell->[0]+$offset->[0], $cell->[1]+$offset->[1]];
+            my $to_check = $self->add_offset($cell, $offset);
             my $s = join(",",@$to_check);
+
             if (!exists($exclude_coords{$s}))
             {
                 push @ret, $to_check;
@@ -183,4 +184,4 @@ This program is released under the following license: MIT/X11 Licence.
 
 =cut
 
-1; # End of Games::Nurikabe::Solver
+1; # End of Games::Nurikabe::Solver::Island

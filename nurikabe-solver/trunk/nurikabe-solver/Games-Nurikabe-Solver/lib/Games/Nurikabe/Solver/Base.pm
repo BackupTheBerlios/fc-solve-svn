@@ -46,6 +46,20 @@ sub new
     return $self;
 }
 
+=head2 my $offset_coords = $self->add_offset($coords, $offset)
+
+Returns the offset coords based on $coords (an [Y,X] coordinates
+in the board) and $offset, which is a [Y,X] offset.
+
+=cut
+
+sub add_offset
+{
+    my ($self, $coords, $offset) = @_;
+
+    return [$coords->[0] + $offset->[0], $coords->[1] + $offset->[1]];
+}
+
 =head1 AUTHOR
 
 Shlomi Fish, C<< <shlomif at cpan.org> >>
