@@ -1,6 +1,7 @@
 Build.PL
 Changes
 examples/gui.pl
+examples/logic-games-online-2008-10-01.txt
 inc/Test/Run/Builder.pm
 lib/Games/Nurikabe/Solver/Base.pm
 lib/Games/Nurikabe/Solver/Board.pm
