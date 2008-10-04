@@ -26,25 +26,25 @@ EOF
         );
 
     # TEST
-    is ($board->get_cell(0,0)->status(),
+    is ($board->get_cell([0,0])->status(),
         $NK_UNKNOWN,
         "Checking Status of Cell (0,0)",
     );
 
     # TEST
-    is ($board->get_cell(0,2)->status(),
+    is ($board->get_cell([0,2])->status(),
         $NK_UNKNOWN,
         "Checking Status of Cell (0,2)",
     );
 
     # TEST
-    is ($board->get_cell(0,3)->status(),
+    is ($board->get_cell([0,3])->status(),
         $NK_WHITE,
         "Status of Cell (0,3) - White"
     );
 
     # TEST
-    is ($board->get_cell(0,3)->island(),
+    is ($board->get_cell([0,3])->island(),
         0,
         "Island of Cell (0,4) - 0"
     );

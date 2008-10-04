@@ -195,7 +195,7 @@ sub load_from_string
     return $self;
 }
 
-=head2 $self->get_cell($y,$x)
+=head2 $self->get_cell( [$y,$x] )
 
 Returns the cell in position ($y, $x). It is a
 L<Games::Nurikabe::Solver::Cell> object.
@@ -204,9 +204,10 @@ L<Games::Nurikabe::Solver::Cell> object.
 
 sub get_cell
 {
-    my ($self, $y, $x) = @_;
+    my $self = shift;
+    my $c = shift;
 
-    return $self->_cells()->[$y]->[$x];
+    return $self->_cells()->[$c->[0]]->[$c->[1]];
 }
 
 =head2 $self->get_island($idx)
@@ -264,7 +265,7 @@ sub _actual_mark
 {
     my ($self, $y, $x, $verdict) = @_;
 
-    $self->get_cell($y,$x,)->status($verdict);
+    $self->get_cell([$y,$x])->status($verdict);
 
     push @{$self->_verdict_marked_cells()->{$verdict}},
         [$y,$x]
@@ -277,7 +278,7 @@ sub _mark_as_black
 {
     my ($self, $y, $x) = @_;
 
-    my $cell = $self->get_cell($y,$x);
+    my $cell = $self->get_cell([$y,$x]);
 
     if ($cell->status() eq $NK_WHITE)
     {
@@ -399,7 +400,7 @@ sub _solve_using_surrounded_by_blacks
                 return;
             }
 
-            if (all { $self->get_cell(@$_)->status() eq $NK_BLACK }
+            if (all { $self->get_cell($_)->status() eq $NK_BLACK }
                 (@{$self->_calc_vicinity(@$coords)})
             )
             {
@@ -433,7 +434,7 @@ sub _adj_whites_handle_shape
         return;
     }
 
-    my $other_cell = $self->get_cell(@$other_coords);
+    my $other_cell = $self->get_cell($other_coords);
     
     if ($other_cell->not_same_island($cell))
     {
@@ -526,7 +527,7 @@ sub _solve_using_distance_from_islands
 
         foreach my $coords (@$non_traverse)
         {
-            $self->get_cell(@$coords)->island_in_proximity($island->idx());
+            $self->get_cell($coords)->island_in_proximity($island->idx());
         }
     }
 
@@ -561,7 +562,7 @@ sub _solve_using_distance_from_islands
                     next OFFSET_LOOP;
                 }
 
-                my $cell = $self->get_cell(@$to_check);
+                my $cell = $self->get_cell($to_check);
 
                 if (($cell->status() eq $NK_BLACK)
                     || (defined($cell->island()) 
