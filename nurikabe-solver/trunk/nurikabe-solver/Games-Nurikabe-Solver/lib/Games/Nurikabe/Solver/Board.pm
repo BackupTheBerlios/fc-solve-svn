@@ -348,7 +348,8 @@ sub _solve_using_surround_island
 
 sub _calc_vicinity
 {
-    my ($self, $y, $x) = @_;
+    my $self = shift;
+    my ($y, $x) = @{shift()};
 
     my @ret;
 
@@ -401,7 +402,7 @@ sub _solve_using_surrounded_by_blacks
             }
 
             if (all { $self->get_cell($_)->status() eq $NK_BLACK }
-                (@{$self->_calc_vicinity(@$coords)})
+                (@{$self->_calc_vicinity($coords)})
             )
             {
                 # We got an unknown cell that's entirely surrounded by blacks -
