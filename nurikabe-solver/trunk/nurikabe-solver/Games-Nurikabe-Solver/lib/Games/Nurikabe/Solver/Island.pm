@@ -5,6 +5,8 @@ use warnings;
 
 use base 'Games::Nurikabe::Solver::Base';
 
+use Games::Nurikabe::Solver::Cell qw($NK_UNKNOWN $NK_WHITE $NK_BLACK);
+
 =head1 NAME
 
 Games::Nurikabe::Solver::Island - a representation of a Nurikabe island.
@@ -126,6 +128,72 @@ sub surround
     return $self->_sort_coords(\@ret);
 }
 
+=head2 $island->mark_reachable_brfs_scan({board => $board})
+
+Mark the reachable unknown cells using a Breadth-First-Search scan.
+
+=cut
+
+sub mark_reachable_brfs_scan
+{
+    my ($island, $args) = @_;
+
+    my $board = $args->{'board'};
+
+    my @queue = (map { [0,$_] } @{$island->known_cells()});
+
+    my $dist_limit = $island->order() - @{$island->known_cells()};
+
+    QUEUE_LOOP:
+    while (@queue)
+    {
+        my $item = shift(@queue);
+        
+        my ($dist, $c) = @$item;
+
+        if ($dist == $dist_limit)
+        {
+            next QUEUE_LOOP;
+        }
+        
+        OFFSET_LOOP:
+        foreach my $offset ([-1,0],[0,-1],[0,1],[1,0])
+        {
+            my $to_check = $board->add_offset($c, $offset);
+
+            if (!$board->_is_in_bounds($to_check))
+            {
+                next OFFSET_LOOP;
+            }
+
+            my $cell = $board->get_cell($to_check);
+
+            if (($cell->status() eq $NK_BLACK)
+                || (defined($cell->island()) 
+                    && $cell->island() != $island->idx()
+                )
+            )
+            {
+                next OFFSET_LOOP;
+            }
+
+            if (defined($cell->island_in_proximity()) &&
+                $cell->island_in_proximity() != $island->idx()
+            )
+            {
+                next OFFSET_LOOP;
+            }
+
+            push @queue, $cell->set_island_reachable(
+                $island->idx(),
+                $dist+1,
+                $to_check
+            );
+        }
+    }
+
+    return;
+}
 
 =head1 AUTHOR
 

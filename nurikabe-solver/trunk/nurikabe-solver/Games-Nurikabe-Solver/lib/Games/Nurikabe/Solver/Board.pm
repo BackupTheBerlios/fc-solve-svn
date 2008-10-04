@@ -538,57 +538,7 @@ sub _solve_using_distance_from_islands
 
     foreach my $island (@{$self->_islands()})
     {
-        my @queue = (map { [0,$_] } @{$island->known_cells()});
-
-        my $dist_limit = $island->order() - @{$island->known_cells()};
-
-        QUEUE_LOOP:
-        while (@queue)
-        {
-            my $item = shift(@queue);
-            
-            my ($dist, $c) = @$item;
-
-            if ($dist == $dist_limit)
-            {
-                next QUEUE_LOOP;
-            }
-            
-            OFFSET_LOOP:
-            foreach my $offset ([-1,0],[0,-1],[0,1],[1,0])
-            {
-                my $to_check = $self->add_offset($c, $offset);
-
-                if (!$self->_is_in_bounds($to_check))
-                {
-                    next OFFSET_LOOP;
-                }
-
-                my $cell = $self->get_cell($to_check);
-
-                if (($cell->status() eq $NK_BLACK)
-                    || (defined($cell->island()) 
-                        && $cell->island() != $island->idx()
-                    )
-                )
-                {
-                    next OFFSET_LOOP;
-                }
-
-                if (defined($cell->island_in_proximity()) &&
-                    $cell->island_in_proximity() != $island->idx()
-                )
-                {
-                    next OFFSET_LOOP;
-                }
-
-                push @queue, $cell->set_island_reachable(
-                    $island->idx(),
-                    $dist+1,
-                    $to_check
-                );
-            }
-        }
+        $island->mark_reachable_brfs_scan({board => $self});
     }
 
     # Now mark the unreachable states.
