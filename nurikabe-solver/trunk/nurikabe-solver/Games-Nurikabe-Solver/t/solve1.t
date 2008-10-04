@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 60;
+use Test::More tests => 62;
 
 use Test::Differences;
 
@@ -456,6 +456,20 @@ EOF
             (any { $_->[0] == 7 && $_->[1] == 0 } 
             @{$m->get_verdict_cells($NK_BLACK)}) ,
             "Marked Cells contain (7,0)",
+        );
+
+        # TEST
+        ok (
+            (any {$_->[0] == 8 && $_->[1] == 0 }
+            @{$m->get_verdict_cells($NK_BLACK)}) ,
+            "Marked Cells contain (8,0)",
+        );
+
+        # TEST
+        ok (
+            (any {$_->[0] == 8 && $_->[1] == 0 }
+            @{$m->get_verdict_cells($NK_BLACK)}) ,
+            "Marked Cells contain (8,1)",
         );
     }
 }
