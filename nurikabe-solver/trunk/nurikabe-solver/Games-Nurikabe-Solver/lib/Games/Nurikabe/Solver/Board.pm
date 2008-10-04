@@ -27,6 +27,7 @@ __PACKAGE__->mk_accessors(qw(
     _cells
     _height
     _islands
+    _moves
     _verdict_marked_cells
     _width
     ));
@@ -78,6 +79,17 @@ sub _flush_verdict_marked_cells
     return $ret;
 }
 
+sub _flush_moves
+{
+    my $self = shift;
+
+    my $ret = $self->_moves();
+
+    $self->_moves([]);
+
+    return $ret;
+}
+
 sub new
 {
     my $class = shift;
@@ -85,6 +97,8 @@ sub new
     my $self = $class->SUPER::new(@_);
 
     $self->_clear_verdict_marked_cells();
+
+    $self->_moves([]);
 
     return $self;
 }
@@ -218,6 +232,23 @@ sub border_exclude_coords
     ];
 }
 
+sub _add_move
+{
+    my $self = shift;
+    my $args = shift;
+
+    push @{$self->_moves()},
+        Games::Nurikabe::Solver::Move->new(
+            {
+                verdict_cells => $self->_flush_verdict_marked_cells(),
+                %$args,
+            },
+        );
+
+    return;
+}
+
+
 sub _actual_mark
 {
     my ($self, $y, $x, $verdict) = @_;
@@ -255,8 +286,6 @@ sub _solve_using_surround_island
 {
     my $self = shift;
 
-    my @moves;
-
     foreach my $island (@{$self->_islands()})
     {
         if ($island->order() == @{$island->known_cells()})
@@ -268,18 +297,16 @@ sub _solve_using_surround_island
                 $self->_mark_as_black(@$coords);
             }
             
-            push @moves,
-                Games::Nurikabe::Solver::Move->new(
-                    {
-                        reason => "surround_island_when_full",
-                        verdict_cells => $self->_flush_verdict_marked_cells(),
-                        reason_params => { island => $island->idx(), },
-                    }
-                );
+            $self->_add_move(
+                {
+                    reason => "surround_island_when_full",
+                    reason_params => { island => $island->idx(), },
+                }
+            );
         }
     }
 
-    return \@moves;
+    return $self->_flush_moves();
 }
 
 sub _calc_vicinity
