@@ -387,8 +387,6 @@ sub _solve_using_adjacent_whites
 {
     my $self = shift;
 
-    my @moves;
-
     foreach my $y (0 .. ($self->_height()-1))
     {
         X_LOOP:
@@ -444,23 +442,21 @@ sub _solve_using_adjacent_whites
                         }
                         if (@{$self->_verdict_marked_cells()->{$NK_BLACK}})
                         {
-                            push @moves,
-                                Games::Nurikabe::Solver::Move->new(
+                            $self->_add_move(
+                                {
+                                    reason => "adjacent_whites",
+                                    reason_params =>
                                     {
-                                        reason => "adjacent_whites",
-                                        verdict_cells => $self->_flush_verdict_marked_cells(),
-                                        reason_params =>
-                                        {
-                                            base_coords => [$y,$x],
-                                            offset => [@$offset],
-                                            islands =>
-                                            [
-                                                $cell->island(),
-                                                $other_cell->island(),
-                                            ],
-                                        },
-                                    }
-                                );
+                                        base_coords => [$y,$x],
+                                        offset => [@$offset],
+                                        islands =>
+                                        [
+                                            $cell->island(),
+                                            $other_cell->island(),
+                                        ],
+                                    },
+                                }
+                            );
                         }
                     }
                 }
@@ -468,7 +464,7 @@ sub _solve_using_adjacent_whites
         }
     }
 
-    return \@moves;
+    return $self->_flush_moves();
 }
 
 =head1 AUTHOR
