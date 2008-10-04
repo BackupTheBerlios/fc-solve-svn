@@ -191,18 +191,7 @@ sub _reachable_brfs_scan_handle_item
 
             my $cell = $board->get_cell($to_check);
 
-            if (($cell->status() eq $NK_BLACK)
-                || (defined($cell->island()) 
-                    && $cell->island() != $island->idx()
-                )
-            )
-            {
-                return;
-            }
-
-            if (defined($cell->island_in_proximity()) &&
-                $cell->island_in_proximity() != $island->idx()
-            )
+            if (! $cell->can_be_marked_by_island($island))
             {
                 return;
             }

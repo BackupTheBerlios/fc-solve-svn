@@ -119,6 +119,36 @@ sub set_island_reachable
     return ([$dist, $c]);
 }
 
+=head2 $self->can_be_marked_by_island($island)
+
+Checks if during the $island BrFS, the cell is available for being
+marked by the island.
+
+=cut
+
+sub can_be_marked_by_island
+{
+    my ($self, $island) = @_;
+
+    if (($self->status() eq $NK_BLACK)
+        || (defined($self->island()) 
+            && $self->island() != $island->idx()
+        )
+    )
+    {
+        return;
+    }
+
+    if (defined($self->island_in_proximity()) &&
+        $self->island_in_proximity() != $island->idx()
+    )
+    {
+        return;
+    }
+
+    return 1;
+}
+
 =head1 AUTHOR
 
 Shlomi Fish, C<< <shlomif at cpan.org> >>
