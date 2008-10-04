@@ -378,7 +378,8 @@ sub _calc_vicinity
 
 sub _is_in_bounds
 {
-    my ($self, $y, $x) = @_;
+    my $self = shift;
+    my ($y, $x) = @{shift()};
 
     return
         (
@@ -430,7 +431,7 @@ sub _adj_whites_handle_shape
     # Other [X,Y] 
     my $other_coords = $self->add_offset($c, $offset);
     
-    if (! $self->_is_in_bounds(@$other_coords))
+    if (! $self->_is_in_bounds($other_coords))
     {
         return;
     }
@@ -558,7 +559,7 @@ sub _solve_using_distance_from_islands
             {
                 my $to_check = $self->add_offset($c, $offset);
 
-                if (!$self->_is_in_bounds(@$to_check))
+                if (!$self->_is_in_bounds($to_check))
                 {
                     next OFFSET_LOOP;
                 }
