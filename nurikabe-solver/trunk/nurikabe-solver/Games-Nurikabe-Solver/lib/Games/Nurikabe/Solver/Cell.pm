@@ -45,6 +45,20 @@ our $NK_BLACK = 2;
 
 our @EXPORT_OK = (qw($NK_BLACK $NK_WHITE $NK_UNKNOWN));
 
+=head2 $self->belongs_to_island()
+
+Returns true if the cell is white and belongs to an island (i.e: it isn't
+marked as white but its island is not yet known).
+
+=cut
+
+sub belongs_to_island
+{
+    my $self = shift;
+
+    return ( ($self->status() eq $NK_WHITE) && defined($self->island()) );
+}
+
 =head1 AUTHOR
 
 Shlomi Fish, C<< <shlomif at cpan.org> >>

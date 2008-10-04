@@ -394,7 +394,7 @@ sub _solve_using_adjacent_whites
         {
             my $cell = $self->get_cell($y,$x);
 
-            if (! (($cell->status() eq $NK_WHITE) && defined($cell->island())))
+            if (! $cell->belongs_to_island())
             {
                 next X_LOOP;
             }
@@ -430,8 +430,7 @@ sub _solve_using_adjacent_whites
                 {
                     my $other_cell = $self->get_cell(@$other_coords);
                     
-                    if (   ($other_cell->status() eq $NK_WHITE)
-                        && defined($other_cell->island())
+                    if (   $other_cell->belongs_to_island()
                         && ($other_cell->island() != $cell->island()))
                     {
                         # Bingo.
