@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 41;
+use Test::More tests => 46;
 
 use Test::Differences;
 
@@ -300,5 +300,58 @@ EOF
             "No more moves left."
         );
 
+    }
+}
+
+{
+    # http://www.logicgamesonline.com/nurikabe/archive.php?pid=981
+    # Daily 9*9 Nurikabe for 2008-10-01
+    my $string_representation = <<"EOF";
+Width=9 Height=9
+[]  []  []  []  []  [3] []  []  []
+[]  [1] []  [5] []  []  []  []  []
+[]  []  []  []  []  []  []  []  []
+[]  []  []  []  [1] []  []  []  []
+[]  []  []  []  []  []  []  []  []
+[]  []  []  []  [6] []  []  []  []
+[]  []  []  []  []  []  []  []  []
+[]  []  []  []  []  [8] []  [7] []
+[]  []  []  [2] []  []  []  []  []
+EOF
+
+    my $board =
+        Games::Nurikabe::Solver::Board->load_from_string(
+            $string_representation
+        );
+
+    {
+        my $moves = $board->_solve_using_adjacent_whites({});
+
+        my $m = shift(@$moves);
+
+        # TEST
+        is ($m->reason(), "adjacent_whites", "reason[0] is OK.");
+
+        # TEST
+        eq_or_diff(
+            $m->get_verdict_cells($NK_BLACK),
+            [[1,2]],
+            "Verdicted cells[0] are [[1,2]].",
+        );
+
+        # TEST
+        eq_or_diff ($m->reason_param("offset"), [0,2], "Offset[0] is (0,2).");
+
+        # TEST
+        eq_or_diff ($m->reason_param("islands"), [1,2],
+            "Islands of [0] are [1,2]",
+        );
+
+        # TEST
+        eq_or_diff (
+            $m->reason_param("base_coords"),
+            [1,1],
+            "Base coords[0] is (1,1)."
+        );
     }
 }

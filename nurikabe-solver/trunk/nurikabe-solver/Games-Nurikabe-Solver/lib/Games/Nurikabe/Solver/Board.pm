@@ -389,6 +389,10 @@ sub _solve_using_adjacent_whites
                     offset => [1,-1],
                     blacks => [[0,-1],[1,0]],
                 },
+                {
+                    offset => [0,2],
+                    blacks => [[0,1]],
+                },
             );
             foreach my $shape (@shapes)
             {
