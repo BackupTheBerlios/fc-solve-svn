@@ -137,7 +137,27 @@ sub OnInit
     my( $self ) = @_;
 
     my $frame = Wx::Frame->new( undef, -1, 'wxPerl', wxDefaultPosition, [ 200, 100 ] );
+
+    my $sizer = Wx::BoxSizer->new(wxHORIZONTAL());
+
+    $frame->SetSizer($sizer);
+
     $frame->{board} = NurikabeCanvas->new($frame);
+    $sizer->Add($frame->{board}, 1, wxALL(), 10);
+    $frame->{list} = Wx::ListBox->new(
+        $frame,
+        -1,
+        wxDefaultPosition(),
+        wxDefaultSize(),
+        [qw(
+            surround_island
+            surrounded_by_blacks
+            adjacent_whites
+            distance_from_islands
+        )]
+    );
+    $sizer->Add($frame->{list}, 1, wxALL(), 10);
+
     $frame->SetSize(Wx::Size->new(600,400));
     $frame->Show( 1 );
 
