@@ -54,7 +54,7 @@ sub new
     my $self = $class->SUPER::new(
         $parent,
         wxID_ANY(),
-        Wx::Point->new(0, 0),
+        Wx::Point->new(20, 20),
         Wx::Size->new($cell_width*9, $cell_height*9)
     );
 
@@ -129,6 +129,7 @@ sub OnInit
 
         my $frame = Wx::Frame->new( undef, -1, 'wxPerl', wxDefaultPosition, [ 200, 100 ] );
         $frame->{board} = NurikabeCanvas->new($frame);
+        $frame->SetSize(Wx::Size->new(600,400));
         $frame->Show( 1 );
 }
 
