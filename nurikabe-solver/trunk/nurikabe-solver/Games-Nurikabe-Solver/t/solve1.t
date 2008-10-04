@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 58;
+use Test::More tests => 60;
 
 use Test::Differences;
 
@@ -439,14 +439,22 @@ EOF
     {
         my $moves = $board->_solve_using_distance_from_islands({});
 
+        my $m = shift(@$moves);
+
         # TEST
-        ok(
-            (any { 
-                my $m = $_;
-                $m->reason("distance_from_islands") &&
-                (any { $_->[0] == 7 && $_->[1] == 0 } 
-                @{$m->get_verdict_cells($NK_BLACK)})
-            } (@$moves)),
+        eq_or_diff(
+            $moves,
+            [],
+            "No remaining moves except the first one."
+        );
+
+        # TEST
+        is ($m->reason(), "distance_from_islands", "Reason is OK.");
+
+        # TEST
+        ok (
+            (any { $_->[0] == 7 && $_->[1] == 0 } 
+            @{$m->get_verdict_cells($NK_BLACK)}) ,
             "Marked Cells contain (7,0)",
         );
     }
