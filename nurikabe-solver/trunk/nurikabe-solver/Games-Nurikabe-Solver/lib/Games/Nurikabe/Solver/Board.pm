@@ -353,8 +353,6 @@ sub _solve_using_surrounded_by_blacks
 {
     my $self = shift;
 
-    my @moves;
-
     foreach my $y (0 .. ($self->_height()-1))
     {
         X_LOOP:
@@ -373,19 +371,16 @@ sub _solve_using_surrounded_by_blacks
                 # We got an unknown cell that's entirely surrounded by blacks -
                 # let's do our thing.
                 $self->_mark_as_black($y,$x);
-                push @moves,
-                    Games::Nurikabe::Solver::Move->new(
-                        {
-                            reason => "surrounded_by_blacks",
-                            verdict_cells =>
-                                $self->_flush_verdict_marked_cells(),
-                        }
-                    );
+                $self->_add_move(
+                    {
+                        reason => "surrounded_by_blacks",
+                    }
+                );
             }
         }
     }
 
-    return \@moves;
+    return $self->_flush_moves();
 }
 
 sub _solve_using_adjacent_whites
