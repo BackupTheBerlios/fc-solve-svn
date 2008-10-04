@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 25;
+use Test::More tests => 30;
 
 use Test::Differences;
 
@@ -210,6 +210,33 @@ EOF
             $m->reason_param("base_coords"),
             [0,0],
             "Base coords[0] is (0,0)."
+        );
+
+        $m = shift(@$moves);
+
+        # TEST
+        is ($m->reason(), "adjacent_whites", "reason[1] is OK.");
+
+        # TEST
+        eq_or_diff(
+            $m->get_verdict_cells($NK_BLACK),
+            [[1,3],[2,4]],
+            "Verdicted cells[1] are OK.",
+        );
+
+        # TEST
+        eq_or_diff ($m->reason_param("offset"), [1,-1], "Offset[1] is (1,-1).");
+
+        # TEST
+        eq_or_diff ($m->reason_param("islands"), [3,4],
+            "Islands of [1] are [3,4]",
+        );
+
+        # TEST
+        eq_or_diff (
+            $m->reason_param("base_coords"),
+            [1,4],
+            "Base coords[1] is (1,4)."
         );
     }
 }

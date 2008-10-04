@@ -379,45 +379,59 @@ sub _solve_using_adjacent_whites
                 next X_LOOP;
             }
 
-            my $offset = [1,1];
-            my $blacks_offsets = [[0,1],[1,0]];
-
-            # Other X and Other Y
-            my $other_coords = [$y + $offset->[0], $x + $offset->[1]];
-            
-            if ($self->_is_in_bounds(@$other_coords))
-            {
-                my $other_cell = $self->get_cell(@$other_coords);
-                
-                if (   ($other_cell->status() eq $NK_WHITE)
-                    && defined($other_cell->island())
-                    && ($other_cell->island() != $cell->island()))
+            my @shapes =
+            (
                 {
-                    # Bingo.
-                    foreach my $b_off (@$blacks_offsets)
+                    offset => [1,1],
+                    blacks => [[0,1],[1,0]],
+                },
+                {
+                    offset => [1,-1],
+                    blacks => [[0,-1],[1,0]],
+                },
+            );
+            foreach my $shape (@shapes)
+            {
+                my $offset = $shape->{'offset'};
+                my $blacks_offsets = $shape->{'blacks'};
+
+                # Other X and Other Y
+                my $other_coords = [$y + $offset->[0], $x + $offset->[1]];
+                
+                if ($self->_is_in_bounds(@$other_coords))
+                {
+                    my $other_cell = $self->get_cell(@$other_coords);
+                    
+                    if (   ($other_cell->status() eq $NK_WHITE)
+                        && defined($other_cell->island())
+                        && ($other_cell->island() != $cell->island()))
                     {
-                        my $b_coords = [$y + $b_off->[0], $x + $b_off->[1]];
-                        $self->_mark_as_black(@$b_coords);
-                    }
-                    if (@{$self->_verdict_marked_cells()->{$NK_BLACK}})
-                    {
-                        push @moves,
-                            Games::Nurikabe::Solver::Move->new(
-                                {
-                                    reason => "adjacent_whites",
-                                    verdict_cells => $self->_flush_verdict_marked_cells(),
-                                    reason_params =>
+                        # Bingo.
+                        foreach my $b_off (@$blacks_offsets)
+                        {
+                            my $b_coords = [$y + $b_off->[0], $x + $b_off->[1]];
+                            $self->_mark_as_black(@$b_coords);
+                        }
+                        if (@{$self->_verdict_marked_cells()->{$NK_BLACK}})
+                        {
+                            push @moves,
+                                Games::Nurikabe::Solver::Move->new(
                                     {
-                                        base_coords => [$y,$x],
-                                        offset => [@$offset],
-                                        islands =>
-                                        [
-                                            $cell->island(),
-                                            $other_cell->island(),
-                                        ],
-                                    },
-                                }
-                            );
+                                        reason => "adjacent_whites",
+                                        verdict_cells => $self->_flush_verdict_marked_cells(),
+                                        reason_params =>
+                                        {
+                                            base_coords => [$y,$x],
+                                            offset => [@$offset],
+                                            islands =>
+                                            [
+                                                $cell->island(),
+                                                $other_cell->island(),
+                                            ],
+                                        },
+                                    }
+                                );
+                        }
                     }
                 }
             }
