@@ -282,6 +282,31 @@ sub _mark_as_black
     return $self->_actual_mark($y,$x,$NK_BLACK);
 }
 
+sub _cells_loop
+{
+    my ($self, $callback) = @_;
+
+    my $y = 0;
+    foreach my $row (@{$self->_cells()})
+    {
+        my $x = 0;
+        foreach my $cell (@$row)
+        {
+            $callback->([$y,$x], $cell);
+        }
+        continue
+        {
+            $x++;
+        }
+    }
+    continue
+    {
+        $y++;
+    }
+
+    return;
+}
+
 sub _solve_using_surround_island
 {
     my $self = shift;
@@ -353,24 +378,23 @@ sub _solve_using_surrounded_by_blacks
 {
     my $self = shift;
 
-    foreach my $y (0 .. ($self->_height()-1))
-    {
-        X_LOOP:
-        foreach my $x (0 .. ($self->_width()-1))
-        {
+    $self->_cells_loop(
+        sub {
+            my ($coords, $cell) = @_;
+
             # We're only interested in unknowns.
-            if ($self->get_cell($y,$x)->status() ne $NK_UNKNOWN)
+            if ($cell->status() ne $NK_UNKNOWN)
             {
-                next X_LOOP;
+                return;
             }
 
             if (all { $self->get_cell(@$_)->status() eq $NK_BLACK }
-                (@{$self->_calc_vicinity($y,$x)})
+                (@{$self->_calc_vicinity(@$coords)})
             )
             {
                 # We got an unknown cell that's entirely surrounded by blacks -
                 # let's do our thing.
-                $self->_mark_as_black($y,$x);
+                $self->_mark_as_black(@$coords);
                 $self->_add_move(
                     {
                         reason => "surrounded_by_blacks",
@@ -378,7 +402,7 @@ sub _solve_using_surrounded_by_blacks
                 );
             }
         }
-    }
+    );
 
     return $self->_flush_moves();
 }
@@ -387,44 +411,47 @@ sub _solve_using_adjacent_whites
 {
     my $self = shift;
 
-    foreach my $y (0 .. ($self->_height()-1))
-    {
-        X_LOOP:
-        foreach my $x (0 .. ($self->_width()-1))
+    my @shapes =
+    (
         {
-            my $cell = $self->get_cell($y,$x);
+            offset => [1,1],
+            blacks => [[0,1],[1,0]],
+        },
+        {
+            offset => [1,-1],
+            blacks => [[0,-1],[1,0]],
+        },
+        {
+            offset => [0,2],
+            blacks => [[0,1]],
+        },
+        {
+            offset => [2,0],
+            blacks => [[1,0]],
+        },
+    );    
+
+    $self->_cells_loop(
+        sub {
+            # $c is coordinates.
+            my ($c, $cell) = @_;
 
             if (! $cell->belongs_to_island())
             {
-                next X_LOOP;
+                return;
             }
 
-            my @shapes =
-            (
-                {
-                    offset => [1,1],
-                    blacks => [[0,1],[1,0]],
-                },
-                {
-                    offset => [1,-1],
-                    blacks => [[0,-1],[1,0]],
-                },
-                {
-                    offset => [0,2],
-                    blacks => [[0,1]],
-                },
-                {
-                    offset => [2,0],
-                    blacks => [[1,0]],
-                },
-            );
             foreach my $shape (@shapes)
             {
                 my $offset = $shape->{'offset'};
                 my $blacks_offsets = $shape->{'blacks'};
 
                 # Other X and Other Y
-                my $other_coords = [$y + $offset->[0], $x + $offset->[1]];
+                my $other_coords =
+                [
+                    $c->[0] + $offset->[0],
+                    $c->[1] + $offset->[1]
+                ];
                 
                 if ($self->_is_in_bounds(@$other_coords))
                 {
@@ -436,7 +463,11 @@ sub _solve_using_adjacent_whites
                         # Bingo.
                         foreach my $b_off (@$blacks_offsets)
                         {
-                            my $b_coords = [$y + $b_off->[0], $x + $b_off->[1]];
+                            my $b_coords =
+                            [
+                                $c->[0] + $b_off->[0],
+                                $c->[1] + $b_off->[1]
+                            ];
                             $self->_mark_as_black(@$b_coords);
                         }
                         if (@{$self->_verdict_marked_cells()->{$NK_BLACK}})
@@ -446,7 +477,7 @@ sub _solve_using_adjacent_whites
                                     reason => "adjacent_whites",
                                     reason_params =>
                                     {
-                                        base_coords => [$y,$x],
+                                        base_coords => [@$c],
                                         offset => [@$offset],
                                         islands =>
                                         [
@@ -461,7 +492,7 @@ sub _solve_using_adjacent_whites
                 }
             }
         }
-    }
+    );
 
     return $self->_flush_moves();
 }
