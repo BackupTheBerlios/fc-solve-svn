@@ -473,12 +473,12 @@ sub _adj_whites_handle_shape
     return;
 }
 
-sub _solve_using_adjacent_whites
+sub _calc_adjacent_whites_shapes_list
 {
     my $self = shift;
 
-    my @shapes =
-    (
+    return
+    [
         {
             offset => [1,1],
             blacks => [[0,1],[1,0]],
@@ -495,7 +495,14 @@ sub _solve_using_adjacent_whites
             offset => [2,0],
             blacks => [[1,0]],
         },
-    );    
+    ];
+}
+
+sub _solve_using_adjacent_whites
+{
+    my $self = shift;
+
+    my $shapes_list = $self->_calc_adjacent_whites_shapes_list();
 
     $self->_cells_loop(
         sub {
@@ -507,7 +514,7 @@ sub _solve_using_adjacent_whites
                 return;
             }
 
-            foreach my $shape (@shapes)
+            foreach my $shape (@$shapes_list)
             {
                 $self->_adj_whites_handle_shape($c, $cell, $shape);
             }
