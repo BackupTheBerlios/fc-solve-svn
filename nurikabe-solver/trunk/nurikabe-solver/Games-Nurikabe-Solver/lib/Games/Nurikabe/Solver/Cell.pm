@@ -45,7 +45,7 @@ our $NK_BLACK = 2;
 
 our @EXPORT_OK = (qw($NK_BLACK $NK_WHITE $NK_UNKNOWN));
 
-=head2 $self->belongs_to_island()
+=head2 my $bool = $self->belongs_to_island()
 
 Returns true if the cell is white and belongs to an island (i.e: it isn't
 marked as white but its island is not yet known).
@@ -57,6 +57,24 @@ sub belongs_to_island
     my $self = shift;
 
     return ( ($self->status() eq $NK_WHITE) && defined($self->island()) );
+}
+
+=head2 my $bool = $cell->not_same_island($other_cell);
+
+Sees if the two cells belong to different islands.
+
+=cut
+
+sub not_same_island
+{
+    my $self = shift;
+    my $other = shift;
+
+    return 
+    (
+           $self->belongs_to_island() 
+        && ($self->island() != $other->island())
+    );
 }
 
 =head1 AUTHOR

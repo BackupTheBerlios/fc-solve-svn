@@ -428,8 +428,7 @@ sub _adj_whites_handle_shape
 
     my $other_cell = $self->get_cell(@$other_coords);
     
-    if (   $other_cell->belongs_to_island()
-        && ($other_cell->island() != $cell->island()))
+    if ($other_cell->not_same_island($cell))
     {
         # Bingo.
         foreach my $b_off (@$blacks_offsets)
