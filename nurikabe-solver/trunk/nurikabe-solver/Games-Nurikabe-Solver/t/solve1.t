@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 30;
+use Test::More tests => 41;
 
 use Test::Differences;
 
@@ -238,5 +238,67 @@ EOF
             [1,4],
             "Base coords[1] is (1,4)."
         );
+
+        $m = shift(@$moves);
+
+        # TEST
+        is ($m->reason(), "adjacent_whites", "reason[2] is OK.");
+
+        # TEST
+        eq_or_diff(
+            $m->get_verdict_cells($NK_BLACK),
+            [[6,4],[7,5]],
+            "Verdicted cells[2] are OK.",
+        );
+
+        # TEST
+        eq_or_diff ($m->reason_param("offset"), [1,-1], "Offset[2] is (1,-1).");
+
+        # TEST
+        eq_or_diff ($m->reason_param("islands"), [5,6],
+            "Islands of [2] are [5,6]",
+        );
+
+        # TEST
+        eq_or_diff (
+            $m->reason_param("base_coords"),
+            [6,5],
+            "Base coords[2] is (6,5)."
+        );
+
+        $m = shift(@$moves);
+
+        # TEST
+        is ($m->reason(), "adjacent_whites", "reason[3] is OK.");
+
+        # TEST
+        eq_or_diff(
+            $m->get_verdict_cells($NK_BLACK),
+            [[7,8],[8,7]],
+            "Verdicted cells[3] are OK.",
+        );
+
+        # TEST
+        eq_or_diff ($m->reason_param("offset"), [1,1], "Offset[3] is (1,1).");
+
+        # TEST
+        eq_or_diff ($m->reason_param("islands"), [7,9],
+            "Islands of [3] are [7,9]",
+        );
+
+        # TEST
+        eq_or_diff (
+            $m->reason_param("base_coords"),
+            [7,7],
+            "Base coords[3] is (7,7)."
+        );
+
+        # TEST
+        eq_or_diff (
+            $moves,
+            [],
+            "No more moves left."
+        );
+
     }
 }
