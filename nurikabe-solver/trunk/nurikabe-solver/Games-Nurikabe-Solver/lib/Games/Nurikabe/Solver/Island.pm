@@ -167,6 +167,55 @@ sub _enqueue
     push @{$self->_queue()}, $item;
 }
 
+sub _dist_limit
+{
+    my $self = shift;
+
+    return $self->order() - @{$self->known_cells()};
+}
+
+sub _reachable_brfs_scan_handle_item
+{
+    my ($island, $board, $item) = @_;
+
+    my ($dist, $c) = @$item;
+
+    if ($dist == $island->_dist_limit())
+    {
+        return;
+    }
+    
+    $island->_vicinity_loop($board, $c,
+        sub {
+            my $to_check = shift;
+
+            my $cell = $board->get_cell($to_check);
+
+            if (($cell->status() eq $NK_BLACK)
+                || (defined($cell->island()) 
+                    && $cell->island() != $island->idx()
+                )
+            )
+            {
+                return;
+            }
+
+            if (defined($cell->island_in_proximity()) &&
+                $cell->island_in_proximity() != $island->idx()
+            )
+            {
+                return;
+            }
+
+            $island->_enqueue($cell->set_island_reachable(
+                $island->idx(),
+                $dist+1,
+                $to_check
+            ));
+        },
+    );
+}
+
 =head2 $island->mark_reachable_brfs_scan({board => $board})
 
 Mark the reachable unknown cells using a Breadth-First-Search scan.
@@ -179,49 +228,12 @@ sub mark_reachable_brfs_scan
 
     my $board = $args->{'board'};
 
-    my $dist_limit = $island->order() - @{$island->known_cells()};
-
     $island->_init_queue();
 
     QUEUE_LOOP:
     while (my $item = $island->_dequeue())
     {
-        my ($dist, $c) = @$item;
-
-        if ($dist == $dist_limit)
-        {
-            next QUEUE_LOOP;
-        }
-        
-        $island->_vicinity_loop($board, $c,
-            sub {
-                my $to_check = shift;
-
-                my $cell = $board->get_cell($to_check);
-
-                if (($cell->status() eq $NK_BLACK)
-                    || (defined($cell->island()) 
-                        && $cell->island() != $island->idx()
-                    )
-                )
-                {
-                    return;
-                }
-
-                if (defined($cell->island_in_proximity()) &&
-                    $cell->island_in_proximity() != $island->idx()
-                )
-                {
-                    return;
-                }
-
-                $island->_enqueue($cell->set_island_reachable(
-                    $island->idx(),
-                    $dist+1,
-                    $to_check
-                ));
-            },
-        );
+        $island->_reachable_brfs_scan_handle_item($board, $item);
     }
 
     return;
