@@ -51,6 +51,20 @@ sub _sort_coords
     ];
 }
 
+sub _vicinity_loop
+{
+    my ($self, $board, $coords, $callback) = @_;
+
+    foreach my $off_coords (
+        grep { $board->_is_in_bounds($_) }
+        map { $self->add_offset($coords, $_) }
+        ([-1,0],[0,-1],[0,1],[1,0])
+    )
+    {
+        $callback->($off_coords);
+    }
+}
+
 =head1 FUNCTIONS
 
 =head2 $island = Games::Nurikabe::Solver::Island->new( {idx => $index, known_cells => [[0,0],[0,1]] })
@@ -105,24 +119,24 @@ sub surround
     my %exclude_coords =
         (map { join(",", @$_) => 1, }
             @{$self->known_cells()},
-            @{$board->border_exclude_coords()},
         );
 
     my @ret;
     foreach my $cell (@{$self->known_cells()})
     {
-        foreach my $offset ([-1,0],[0,-1],[0,1],[1,0])
-        {
-            my $to_check = $self->add_offset($cell, $offset);
-            my $s = join(",",@$to_check);
+        $self->_vicinity_loop($board, $cell,
+            sub {
+                my $to_check = shift;
+                my $s = join(",",@$to_check);
 
-            if (!exists($exclude_coords{$s}))
-            {
-                push @ret, $to_check;
-                # Make sure we don't repeat ourselves
-                $exclude_coords{$s} = 1;
+                if (!exists($exclude_coords{$s}))
+                {
+                    push @ret, $to_check;
+                    # Make sure we don't repeat ourselves
+                    $exclude_coords{$s} = 1;
+                }
             }
-        }
+        );
     }
 
     return $self->_sort_coords(\@ret);
@@ -156,40 +170,35 @@ sub mark_reachable_brfs_scan
             next QUEUE_LOOP;
         }
         
-        OFFSET_LOOP:
-        foreach my $offset ([-1,0],[0,-1],[0,1],[1,0])
-        {
-            my $to_check = $board->add_offset($c, $offset);
+        $island->_vicinity_loop($board, $c,
+            sub {
+                my $to_check = shift;
 
-            if (!$board->_is_in_bounds($to_check))
-            {
-                next OFFSET_LOOP;
-            }
+                my $cell = $board->get_cell($to_check);
 
-            my $cell = $board->get_cell($to_check);
-
-            if (($cell->status() eq $NK_BLACK)
-                || (defined($cell->island()) 
-                    && $cell->island() != $island->idx()
+                if (($cell->status() eq $NK_BLACK)
+                    || (defined($cell->island()) 
+                        && $cell->island() != $island->idx()
+                    )
                 )
-            )
-            {
-                next OFFSET_LOOP;
-            }
+                {
+                    return;
+                }
 
-            if (defined($cell->island_in_proximity()) &&
-                $cell->island_in_proximity() != $island->idx()
-            )
-            {
-                next OFFSET_LOOP;
-            }
+                if (defined($cell->island_in_proximity()) &&
+                    $cell->island_in_proximity() != $island->idx()
+                )
+                {
+                    return;
+                }
 
-            push @queue, $cell->set_island_reachable(
-                $island->idx(),
-                $dist+1,
-                $to_check
-            );
-        }
+                push @queue, $cell->set_island_reachable(
+                    $island->idx(),
+                    $dist+1,
+                    $to_check
+                );
+            },
+        );
     }
 
     return;
