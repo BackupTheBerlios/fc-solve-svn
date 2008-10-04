@@ -23,6 +23,7 @@ __PACKAGE__->mk_accessors(qw(
     idx
     known_cells
     order
+    _queue
     ));
 
 =head1 SYNOPSIS
@@ -142,6 +143,30 @@ sub surround
     return $self->_sort_coords(\@ret);
 }
 
+sub _init_queue
+{
+    my $island = shift;
+
+    $island->_queue([map { [0,$_] } @{$island->known_cells()}]);
+
+    return;
+}
+
+sub _dequeue
+{
+    my $self = shift;
+
+    return shift(@{$self->_queue()});
+}
+
+sub _enqueue
+{
+    my $self = shift;
+    my $item = shift;
+
+    push @{$self->_queue()}, $item;
+}
+
 =head2 $island->mark_reachable_brfs_scan({board => $board})
 
 Mark the reachable unknown cells using a Breadth-First-Search scan.
@@ -154,15 +179,13 @@ sub mark_reachable_brfs_scan
 
     my $board = $args->{'board'};
 
-    my @queue = (map { [0,$_] } @{$island->known_cells()});
-
     my $dist_limit = $island->order() - @{$island->known_cells()};
 
+    $island->_init_queue();
+
     QUEUE_LOOP:
-    while (@queue)
+    while (my $item = $island->_dequeue())
     {
-        my $item = shift(@queue);
-        
         my ($dist, $c) = @$item;
 
         if ($dist == $dist_limit)
@@ -192,11 +215,11 @@ sub mark_reachable_brfs_scan
                     return;
                 }
 
-                push @queue, $cell->set_island_reachable(
+                $island->_enqueue($cell->set_island_reachable(
                     $island->idx(),
                     $dist+1,
                     $to_check
-                );
+                ));
             },
         );
     }
