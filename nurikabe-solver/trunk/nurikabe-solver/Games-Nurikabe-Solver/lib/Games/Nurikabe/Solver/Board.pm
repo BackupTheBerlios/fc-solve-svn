@@ -421,41 +421,43 @@ sub _adj_whites_handle_shape
         $c->[1] + $offset->[1]
     ];
     
-    if ($self->_is_in_bounds(@$other_coords))
+    if (! $self->_is_in_bounds(@$other_coords))
     {
-        my $other_cell = $self->get_cell(@$other_coords);
-        
-        if (   $other_cell->belongs_to_island()
-            && ($other_cell->island() != $cell->island()))
+        return;
+    }
+
+    my $other_cell = $self->get_cell(@$other_coords);
+    
+    if (   $other_cell->belongs_to_island()
+        && ($other_cell->island() != $cell->island()))
+    {
+        # Bingo.
+        foreach my $b_off (@$blacks_offsets)
         {
-            # Bingo.
-            foreach my $b_off (@$blacks_offsets)
-            {
-                my $b_coords =
-                [
-                    $c->[0] + $b_off->[0],
-                    $c->[1] + $b_off->[1]
-                ];
-                $self->_mark_as_black(@$b_coords);
-            }
-            if (@{$self->_verdict_marked_cells()->{$NK_BLACK}})
-            {
-                $self->_add_move(
+            my $b_coords =
+            [
+                $c->[0] + $b_off->[0],
+                $c->[1] + $b_off->[1]
+            ];
+            $self->_mark_as_black(@$b_coords);
+        }
+        if (@{$self->_verdict_marked_cells()->{$NK_BLACK}})
+        {
+            $self->_add_move(
+                {
+                    reason => "adjacent_whites",
+                    reason_params =>
                     {
-                        reason => "adjacent_whites",
-                        reason_params =>
-                        {
-                            base_coords => [@$c],
-                            offset => [@$offset],
-                            islands =>
-                            [
-                                $cell->island(),
-                                $other_cell->island(),
-                            ],
-                        },
-                    }
-                );
-            }
+                        base_coords => [@$c],
+                        offset => [@$offset],
+                        islands =>
+                        [
+                            $cell->island(),
+                            $other_cell->island(),
+                        ],
+                    },
+                }
+            );
         }
     }
 
