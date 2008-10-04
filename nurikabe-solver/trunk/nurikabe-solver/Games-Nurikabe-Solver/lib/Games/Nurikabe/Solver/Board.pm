@@ -263,12 +263,12 @@ sub _add_move
 
 sub _actual_mark
 {
-    my ($self, $y, $x, $verdict) = @_;
+    my ($self, $coords, $verdict) = @_;
 
-    $self->get_cell([$y,$x])->status($verdict);
+    $self->get_cell($coords)->status($verdict);
 
     push @{$self->_verdict_marked_cells()->{$verdict}},
-        [$y,$x]
+        $coords
         ;
 
     return;
@@ -276,13 +276,13 @@ sub _actual_mark
 
 sub _mark_as_black
 {
-    my ($self, $y, $x) = @_;
+    my ($self, $c) = @_;
 
-    my $cell = $self->get_cell([$y,$x]);
+    my $cell = $self->get_cell($c);
 
     if ($cell->status() eq $NK_WHITE)
     {
-        die "Cell ($y,$x) should not be white but it is";
+        die "Cell ($c->[0],$c->[1]) should not be white but it is";
     }
 
     if ($cell->status() eq $NK_BLACK)
@@ -291,7 +291,7 @@ sub _mark_as_black
         return;
     }
 
-    return $self->_actual_mark($y,$x,$NK_BLACK);
+    return $self->_actual_mark($c,$NK_BLACK);
 }
 
 sub _cells_loop
@@ -331,7 +331,7 @@ sub _solve_using_surround_island
 
             foreach my $coords (@$black_cells)
             {
-                $self->_mark_as_black(@$coords);
+                $self->_mark_as_black($coords);
             }
             
             $self->_add_move(
@@ -406,7 +406,7 @@ sub _solve_using_surrounded_by_blacks
             {
                 # We got an unknown cell that's entirely surrounded by blacks -
                 # let's do our thing.
-                $self->_mark_as_black(@$coords);
+                $self->_mark_as_black($coords);
                 $self->_add_move(
                     {
                         reason => "surrounded_by_blacks",
@@ -441,7 +441,7 @@ sub _adj_whites_handle_shape
         # Bingo.
         foreach my $b_off (@$blacks_offsets)
         {
-            $self->_mark_as_black(@{$self->add_offset($c, $b_off)});
+            $self->_mark_as_black($self->add_offset($c, $b_off));
         }
 
         $self->_add_move(
@@ -596,7 +596,7 @@ sub _solve_using_distance_from_islands
 
             if ($cell->status() eq $NK_UNKNOWN && ! $cell->_reachable())
             {
-                $self->_mark_as_black(@$coords);
+                $self->_mark_as_black($coords);
             }
         },
     );
