@@ -29,20 +29,20 @@ sub slurp
     }
 }
 
-my $board = Games::Nurikabe::Solver::Board->load_from_string(
-    slurp(shift(@ARGV))
-);
-
-my %numbers = ();
-
 sub assign_board
 {
     my $self = shift;
+    my $filename = shift;
 
-    foreach my $island (@{$board->_islands()})
+    $self->{board} = Games::Nurikabe::Solver::Board->load_from_string(
+        slurp($filename),
+    );
+
+    $self->{numbers} = +{};
+    foreach my $island (@{$self->{board}->_islands()})
     {
         my $cell = $island->known_cells->[0];
-        $numbers{join(",", @$cell)} = $island->order();
+        $self->{numbers}->{join(",", @$cell)} = $island->order();
     }
 }
 
@@ -57,8 +57,6 @@ sub new
         Wx::Point->new(20, 20),
         Wx::Size->new($cell_width*9, $cell_height*9)
     );
-
-    $self->assign_board();
 
     EVT_PAINT( $self, \&OnPaint );
 
@@ -79,7 +77,7 @@ sub OnPaint
     {
         for my $x (0 .. 8)
         {
-            my $status = $board->get_cell([$y,$x])->status();
+            my $status = $self->{board}->get_cell([$y,$x])->status();
 
             if ($status eq $NK_UNKNOWN)
             {
@@ -100,9 +98,9 @@ sub OnPaint
                 $p_x, $p_y, $cell_width, $cell_height
             );
 
-            if (exists($numbers{join(",",$y,$x)}))
+            if (exists($self->{numbers}->{join(",",$y,$x)}))
             {
-                my $s = $numbers{join(",",$y,$x)};
+                my $s = $self->{numbers}->{join(",",$y,$x)};
 
                 my $c_x = $p_x + $cell_width/2;
                 my $c_y = $p_y + $cell_height/2;
@@ -123,17 +121,42 @@ package NurikabeApp;
 use base 'Wx::App';
 use Wx ':everything';
 
+sub new
+{
+    my ($class, $filename) = @_;
+
+    my $self = $class->SUPER::new();
+
+    $self->assign_filename($filename);
+
+    return $self;
+}
+
 sub OnInit
 {
-        my( $this ) = @_;
+    my( $self ) = @_;
 
-        my $frame = Wx::Frame->new( undef, -1, 'wxPerl', wxDefaultPosition, [ 200, 100 ] );
-        $frame->{board} = NurikabeCanvas->new($frame);
-        $frame->SetSize(Wx::Size->new(600,400));
-        $frame->Show( 1 );
+    my $frame = Wx::Frame->new( undef, -1, 'wxPerl', wxDefaultPosition, [ 200, 100 ] );
+    $frame->{board} = NurikabeCanvas->new($frame);
+    $frame->SetSize(Wx::Size->new(600,400));
+    $frame->Show( 1 );
+
+    $self->{frame} = $frame;
+
+    return 1;
+}
+
+sub assign_filename
+{
+    my ($self, $filename) = @_;
+
+    $self->{filename} = $filename;
+    $self->{frame}->{board}->assign_board($self->{filename});
+
+    return;
 }
 
 package main;
 
-NurikabeApp->new()->MainLoop();
+NurikabeApp->new(shift(@ARGV))->MainLoop();
 
