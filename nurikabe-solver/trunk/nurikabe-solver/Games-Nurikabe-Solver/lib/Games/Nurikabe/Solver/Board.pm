@@ -514,6 +514,101 @@ sub _solve_using_adjacent_whites
     return $self->_flush_moves();
 }
 
+sub _solve_using_distance_from_islands
+{
+    my $self = shift;
+
+    # Mark non-traversable cells - these are cells that are too close 
+    # to a white island cell.
+    foreach my $island (@{$self->_islands()})
+    {
+        my $non_traverse = $island->surround({board => $self });
+
+        foreach my $coords (@$non_traverse)
+        {
+            $self->get_cell(@$coords)->island_in_proximity($island->idx());
+        }
+    }
+
+    # Now do a Breadth-First Search scan for every island and mark the
+    # islands reachable by it.
+
+    foreach my $island (@{$self->_islands()})
+    {
+        my @queue = (map { [0,$_] } @{$island->known_cells()});
+
+        my $dist_limit = $island->order() - @{$island->known_cells()};
+
+        QUEUE_LOOP:
+        while (@queue)
+        {
+            my $item = shift(@queue);
+            
+            my ($dist, $c) = @$item;
+
+            if ($dist == $dist_limit)
+            {
+                next QUEUE_LOOP;
+            }
+            
+            OFFSET_LOOP:
+            foreach my $offset ([-1,0],[0,-1],[0,1],[1,0])
+            {
+                my $to_check = $self->add_offset($c, $offset);
+
+                if (!$self->_is_in_bounds(@$to_check))
+                {
+                    next OFFSET_LOOP;
+                }
+
+                my $cell = $self->get_cell(@$to_check);
+
+                if (($cell->status() eq $NK_BLACK)
+                    || (defined($cell->island()) 
+                        && $cell->island() != $island->idx()
+                    )
+                )
+                {
+                    next OFFSET_LOOP;
+                }
+
+                if (defined($cell->island_in_proximity()) &&
+                    $cell->island_in_proximity() != $island->idx()
+                )
+                {
+                    next OFFSET_LOOP;
+                }
+
+                push @queue, $cell->set_island_reachable(
+                    $island->idx(),
+                    $dist+1,
+                    $to_check
+                );
+            }
+        }
+    }
+
+    # Now mark the unreachable states.
+    $self->_cells_loop(
+        sub {
+            my ($coords, $cell) = @_;
+
+            if ($cell->status() eq $NK_UNKNOWN && ! $cell->_reachable())
+            {
+                $self->_mark_as_black(@$coords);
+            }
+        },
+    );
+
+    $self->_add_move(
+        {
+            reason => "distance_from_islands",
+        }
+    );
+
+    return $self->_flush_moves();
+}
+
 =head1 AUTHOR
 
 Shlomi Fish, C<< <shlomif at cpan.org> >>

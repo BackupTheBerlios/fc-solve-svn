@@ -3,7 +3,7 @@ package Games::Nurikabe::Solver::Cell;
 use warnings;
 use strict;
 
-use base 'Class::Accessor';
+use base 'Games::Nurikabe::Solver::Base';
 use base 'Exporter';
 
 =head1 NAME
@@ -21,6 +21,9 @@ our $VERSION = '0.01';
 __PACKAGE__->mk_accessors(qw(
     status
     island
+    island_in_proximity
+    _reachable
+    _island_reachable
     ));
 
 =head1 SYNOPSIS
@@ -44,6 +47,19 @@ our $NK_WHITE = 1;
 our $NK_BLACK = 2;
 
 our @EXPORT_OK = (qw($NK_BLACK $NK_WHITE $NK_UNKNOWN));
+
+sub _init
+{
+    my $self = shift;
+    my $args = shift;
+
+    $self->status($args->{status});
+    $self->island($args->{island});
+    $self->_reachable(0);
+    $self->_island_reachable([]);
+
+    return 0;
+}
 
 =head2 my $bool = $self->belongs_to_island()
 
@@ -75,6 +91,32 @@ sub not_same_island
            $self->belongs_to_island() 
         && ($self->island() != $other->island())
     );
+}
+
+=head2 $self->set_island_reachable($island_idx, $distance, $coords)
+
+Sets the island-related reachable distance from $island_idx. If we already
+have a suitable distance (lower or equal) - does nothing and returns false.
+
+Else sets and returns the [$distance, $coords] of the new point.
+
+=cut
+
+sub set_island_reachable
+{
+    my ($self, $island, $dist, $c) = @_;
+
+    if (defined($self->_island_reachable->[$island]) &&
+        ($self->_island_reachable->[$island] <= $dist)
+    )
+    {
+        return;
+    }
+
+    $self->_island_reachable->[$island] = $dist;
+    $self->_reachable(1);
+
+    return ([$dist, $c]);
 }
 
 =head1 AUTHOR

@@ -3,12 +3,14 @@
 use strict;
 use warnings;
 
-use Test::More tests => 57;
+use Test::More tests => 58;
 
 use Test::Differences;
 
 use Games::Nurikabe::Solver::Cell qw($NK_UNKNOWN $NK_WHITE $NK_BLACK);
 use Games::Nurikabe::Solver::Board;
+
+use List::MoreUtils qw(any);
 
 {
     my $string_representation = <<"EOF";
@@ -410,5 +412,42 @@ EOF
 
         # TEST
         eq_or_diff ($moves, [], "No more moves left.");
+    }
+}
+
+{
+    # http://www.logicgamesonline.com/nurikabe/archive.php?pid=981
+    # Daily 9*9 Nurikabe for 2008-10-01
+    my $string_representation = <<"EOF";
+Width=9 Height=9
+[]  []  []  []  []  [3] []  []  []
+[]  [1] []  [5] []  []  []  []  []
+[]  []  []  []  []  []  []  []  []
+[]  []  []  []  [1] []  []  []  []
+[]  []  []  []  []  []  []  []  []
+[]  []  []  []  [6] []  []  []  []
+[]  []  []  []  []  []  []  []  []
+[]  []  []  []  []  [8] []  [7] []
+[]  []  []  [2] []  []  []  []  []
+EOF
+
+    my $board =
+        Games::Nurikabe::Solver::Board->load_from_string(
+            $string_representation
+        );
+
+    {
+        my $moves = $board->_solve_using_distance_from_islands({});
+
+        # TEST
+        ok(
+            (any { 
+                my $m = $_;
+                $m->reason("distance_from_islands") &&
+                (any { $_->[0] == 7 && $_->[1] == 0 } 
+                @{$m->get_verdict_cells($NK_BLACK)})
+            } (@$moves)),
+            "Marked Cells contain (7,0)",
+        );
     }
 }
