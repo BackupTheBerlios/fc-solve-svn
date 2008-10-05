@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 64;
+use Test::More tests => 66;
 
 use Test::Differences;
 
@@ -415,6 +415,34 @@ EOF
     }
 }
 
+package MyMove;
+
+use base 'Class::Accessor';
+
+use List::MoreUtils qw(any);
+
+use Games::Nurikabe::Solver::Cell qw($NK_UNKNOWN $NK_WHITE $NK_BLACK);
+
+__PACKAGE__->mk_accessors(qw(move));
+
+sub in_black
+{
+    my ($self, $coords) = @_;
+    
+    return (any { $_->[0] == $coords->[0] && $_->[1] == $coords->[1] }
+           @{$self->move->get_verdict_cells($NK_BLACK)})
+       ;
+}
+
+sub reason
+{
+    my $self = shift;
+
+    return $self->move->reason();
+}
+
+package main;
+
 {
     # http://www.logicgamesonline.com/nurikabe/archive.php?pid=981
     # Daily 9*9 Nurikabe for 2008-10-01
@@ -439,7 +467,7 @@ EOF
     {
         my $moves = $board->_solve_using_distance_from_islands({});
 
-        my $m = shift(@$moves);
+        my $m = MyMove->new({move => shift(@$moves)});
 
         # TEST
         eq_or_diff(
@@ -453,38 +481,44 @@ EOF
 
         # TEST
         ok (
-            (any { $_->[0] == 7 && $_->[1] == 0 } 
-            @{$m->get_verdict_cells($NK_BLACK)}) ,
+            $m->in_black([7,0]),
             "Marked Cells contain (7,0)",
         );
 
         # TEST
         ok (
-            (any {$_->[0] == 8 && $_->[1] == 0 }
-            @{$m->get_verdict_cells($NK_BLACK)}) ,
+            $m->in_black([8,0]),
             "Marked Cells contain (8,0)",
         );
 
         # TEST
         ok (
-            (any {$_->[0] == 8 && $_->[1] == 0 }
-            @{$m->get_verdict_cells($NK_BLACK)}) ,
+            $m->in_black([8,1]),
             "Marked Cells contain (8,1)",
         );
 
         # TEST
         ok (
-            (any {$_->[0] == 0 && $_->[1] == 8 }
-            @{$m->get_verdict_cells($NK_BLACK)}) ,
-            "Marked Cells contain (8,0)",
+            $m->in_black([0,8]),
+            "Marked Cells contain (0,8)",
         );
 
         # TEST
         ok (
-            (any {$_->[0] == 2 && $_->[1] == 0 }
-            @{$m->get_verdict_cells($NK_BLACK)}) ,
+            $m->in_black([2,0]),
             "Marked Cells contain (8,1)",
         );
 
+        # TEST
+        ok (
+            !$m->in_black([5,1]),
+            "Marked Cells does not contain (5,1) which is accessible",
+        );
+
+        # TEST
+        ok (
+            !$m->in_black([3,6]),
+            "Marked Cells does not contain (3,6) which is accessible",
+        );
     }
 }

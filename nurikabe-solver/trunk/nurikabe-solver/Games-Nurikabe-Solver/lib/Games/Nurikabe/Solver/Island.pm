@@ -164,7 +164,10 @@ sub _enqueue
     my $self = shift;
     my $item = shift;
 
-    push @{$self->_queue()}, $item;
+    if (defined($item))
+    {
+        push @{$self->_queue()}, $item;
+    }
 }
 
 sub _dist_limit
