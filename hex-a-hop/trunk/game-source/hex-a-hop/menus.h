@@ -364,7 +364,7 @@ char* GetSlotName(int i, char * t)
 	 return t;
 }
 
-char * optionString[] = {
+const char * optionString[] = {
 	optionSlotName[0],
 	optionSlotName[1],
 	optionSlotName[2],

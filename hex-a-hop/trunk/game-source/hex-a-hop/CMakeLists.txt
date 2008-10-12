@@ -1,3 +1,5 @@
+INCLUDE( "${CMAKE_CURRENT_SOURCE_DIR}/Common.cmake" )
+
 # This is the equivalent to perform a "make dist"/"make distdir" etc.
 SET(CPACK_PACKAGE_NAME "hex-a-hop")
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Hex-a-hop")
