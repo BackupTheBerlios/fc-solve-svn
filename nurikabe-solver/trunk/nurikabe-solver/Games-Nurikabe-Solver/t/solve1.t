@@ -25,7 +25,12 @@ EOF
         );
 
     {
-        my $moves = $board->_solve_using_surround_island({});
+        my $moves = $board->_solve_using(
+            {
+                name => "surround_island",
+                params => {},
+            }
+        );
 
         # TEST
         is (scalar(@$moves), 1, "There is 1 move");
@@ -49,7 +54,11 @@ EOF
     }
 
     {
-        my $moves = $board->_solve_using_surrounded_by_blacks({});
+        my $moves = $board->_solve_using(
+            {
+                name => "surrounded_by_blacks",
+                params => {},
+            });
 
         # TEST
         is (scalar(@$moves), 1, "There is 1 move");
@@ -82,7 +91,12 @@ EOF
         );
 
     {
-        my $moves = $board->_solve_using_surround_island({});
+        my $moves = $board->_solve_using(
+            {
+                name => "surround_island",
+                params => {},
+            }
+        );
 
         # TEST
         is (scalar(@$moves), 1, "There is 1 move");
@@ -106,7 +120,12 @@ EOF
     }
 
     {
-        my $moves = $board->_solve_using_surrounded_by_blacks({});
+        my $moves = $board->_solve_using(
+            {
+                name => "surrounded_by_blacks",
+                params => {},
+            }
+        );
 
         my $m;
         
@@ -185,7 +204,12 @@ EOF
         );
 
     {
-        my $moves = $board->_solve_using_adjacent_whites({});
+        my $moves = $board->_solve_using(
+            {
+                name => "adjacent_whites",
+                params => {},
+            }
+        );
 
         my $m = shift(@$moves);
 
@@ -327,7 +351,12 @@ EOF
         );
 
     {
-        my $moves = $board->_solve_using_adjacent_whites({});
+        my $moves = $board->_solve_using(
+            {
+                name => "adjacent_whites",
+                params => {},
+            }
+        );
 
         my $m = shift(@$moves);
 
@@ -465,7 +494,12 @@ EOF
         );
 
     {
-        my $moves = $board->_solve_using_distance_from_islands({});
+        my $moves = $board->_solve_using(
+            {
+                name => "distance_from_islands",
+                params => {},
+            }
+        );
 
         my $m = MyMove->new({move => shift(@$moves)});
 

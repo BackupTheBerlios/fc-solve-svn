@@ -343,7 +343,7 @@ sub _solve_using_surround_island
         }
     }
 
-    return $self->_flush_moves();
+    return;
 }
 
 sub _calc_vicinity
@@ -418,7 +418,7 @@ sub _solve_using_surrounded_by_blacks
         }
     );
 
-    return $self->_flush_moves();
+    return;
 }
 
 sub _adj_whites_handle_shape
@@ -514,7 +514,7 @@ sub _solve_using_adjacent_whites
         }
     );
 
-    return $self->_flush_moves();
+    return;
 }
 
 sub _solve_using_distance_from_islands
@@ -558,6 +558,21 @@ sub _solve_using_distance_from_islands
             reason => "distance_from_islands",
         }
     );
+
+    return;
+}
+
+sub _solve_using
+{
+    my $self = shift;
+    my $args = shift;
+
+    my $name = $args->{name};
+    my $move_params = $args->{params};
+
+    my $move_method = "_solve_using_$name";
+
+    $self->$move_method($move_params);
 
     return $self->_flush_moves();
 }
