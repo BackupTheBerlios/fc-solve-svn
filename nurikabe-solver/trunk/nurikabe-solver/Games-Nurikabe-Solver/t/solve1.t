@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 70;
+use Test::More tests => 72;
 
 use Test::Differences;
 
@@ -212,6 +212,15 @@ EOF
         Games::Nurikabe::Solver::Board->load_from_string(
             $string_representation
         );
+
+    # TEST
+    is ($board->_num_expected_cells($NK_WHITE), 1+5+6+6+3+2+3+3+2+1,
+        "Expected white cells");
+
+    # TEST
+    is ($board->_num_expected_cells($NK_BLACK), 9*9-(1+5+6+6+3+2+3+3+2+1),
+        "Expected black cells"
+    );
 
     {
         my $moves = $board->_solve_using(
