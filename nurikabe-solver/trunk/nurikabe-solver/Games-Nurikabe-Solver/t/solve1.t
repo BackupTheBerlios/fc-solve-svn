@@ -10,8 +10,6 @@ use Test::Differences;
 use Games::Nurikabe::Solver::Cell qw($NK_UNKNOWN $NK_WHITE $NK_BLACK);
 use Games::Nurikabe::Solver::Board;
 
-use List::MoreUtils qw(any);
-
 {
     my $string_representation = <<"EOF";
 Width=2 Height=2
