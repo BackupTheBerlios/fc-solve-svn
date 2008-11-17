@@ -89,6 +89,14 @@ sub _num_expected_cells
     return $self->_expected_totals()->{$color};
 }
 
+sub _num_found_cells
+{
+    my $self = shift;
+    my $color = shift;
+
+    return $self->_found_totals()->{$color};
+}
+
 sub _exist_verdict_marked_cells
 {
     my $self = shift;
@@ -213,8 +221,9 @@ sub load_from_string
                             island => $index,
                         }
                     );
-                # TODO :
-                # Mark the _found_totals().
+
+                $self->_found_totals()->{$NK_WHITE}++;
+                $self->_found_totals()->{$NK_UNKNOWN}--;
             }
             push @{$cells[$y]}, $cell_obj;
         }
@@ -321,6 +330,9 @@ sub _mark_as_black
         # Do nothing - it's already black.
         return;
     }
+
+    $self->_found_totals()->{$NK_BLACK}++;
+    $self->_found_totals()->{$NK_UNKNOWN}--;
 
     return $self->_actual_mark($c,$NK_BLACK);
 }

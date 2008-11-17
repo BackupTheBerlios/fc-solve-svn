@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 72;
+use Test::More tests => 78;
 
 use Test::Differences;
 
@@ -27,6 +27,17 @@ EOF
 
     # TEST
     is ($board->_num_expected_cells($NK_BLACK), 3, "Expecting 3 Black Cells");
+
+    # TEST
+    is ($board->_num_found_cells($NK_WHITE), 1, "Found 1 White Cells");
+
+    # TEST
+    is ($board->_num_found_cells($NK_BLACK), 0, "Found 0 Black Cells");
+
+    # TEST
+    is ($board->_num_found_cells($NK_UNKNOWN), 3, 
+        "Currently have 3 unknown cells"
+    );
 
     {
         my $moves = $board->_solve_using(
@@ -54,6 +65,17 @@ EOF
         # TEST
         is ($m->reason_param("island"), 0,
             "The island is 0 in the reason parameter",
+        );
+
+        # TEST
+        is ($board->_num_found_cells($NK_WHITE), 1, "Found 1 White Cells");
+
+        # TEST
+        is ($board->_num_found_cells($NK_BLACK), 2, "Found 2 Black Cells");
+
+        # TEST
+        is ($board->_num_found_cells($NK_UNKNOWN), 1, 
+            "Currently have 1 unknown cells"
         );
     }
 
