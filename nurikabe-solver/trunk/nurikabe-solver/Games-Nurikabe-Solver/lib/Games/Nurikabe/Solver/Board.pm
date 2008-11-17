@@ -25,6 +25,8 @@ our $VERSION = '0.01';
 
 __PACKAGE__->mk_accessors(qw(
     _cells
+    _expected_totals
+    _found_totals
     _height
     _islands
     _moves
@@ -79,6 +81,14 @@ sub _flush_verdict_marked_cells
     return $ret;
 }
 
+sub _num_expected_cells
+{
+    my $self = shift;
+    my $color = shift;
+
+    return $self->_expected_totals()->{$color};
+}
+
 sub _exist_verdict_marked_cells
 {
     my $self = shift;
@@ -110,6 +120,22 @@ sub _init
     $self->_clear_verdict_marked_cells();
 
     $self->_moves([]);
+
+    $self->_expected_totals
+    (
+        {
+            $NK_BLACK => ($self->_width()*$self->_height()),
+            $NK_WHITE => 0,
+        },
+    );
+
+    $self->_found_totals(
+        {
+            $NK_UNKNOWN => ($self->_width()*$self->_height()),
+            $NK_BLACK => 0,
+            $NK_WHITE => 0,
+        }
+    );
 
     return 0;
 }
@@ -176,7 +202,10 @@ sub load_from_string
                             order => $num_cells,
                         },
                     );
-                
+
+                $self->_expected_totals()->{$NK_WHITE} += $num_cells;
+                $self->_expected_totals()->{$NK_BLACK} -= $num_cells;
+
                 $cell_obj =
                     Games::Nurikabe::Solver::Cell->new(
                         {
@@ -184,6 +213,8 @@ sub load_from_string
                             island => $index,
                         }
                     );
+                # TODO :
+                # Mark the _found_totals().
             }
             push @{$cells[$y]}, $cell_obj;
         }
