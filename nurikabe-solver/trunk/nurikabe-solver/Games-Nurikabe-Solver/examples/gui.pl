@@ -74,11 +74,13 @@ sub OnPaint
 
     $dc->SetPen( $black_pen );
 
-    for my $y (0 .. 8)
+    my $board = $self->{board};
+
+    for my $y (0 .. $board->_height()-1)
     {
-        for my $x (0 .. 8)
+        for my $x (0 .. $board->_width()-1)
         {
-            my $status = $self->{board}->get_cell([$y,$x])->status();
+            my $status = $board->get_cell([$y,$x])->status();
 
             if ($status eq $NK_UNKNOWN)
             {
