@@ -34,6 +34,9 @@
 #include <sys/timeb.h>
 #endif
 #include <pthread.h>
+#ifndef WIN32
+#include <unistd.h>
+#endif
 
 #include "fcs_user.h"
 #include "fcs_cl.h"
@@ -409,7 +412,7 @@ void print_int(binary_output_t * bin, int val)
     }
 }
 
-#define print_int_wrapper(i) { if (binary_output.file) { print_int(&binary_output, (i));  } }
+#define print_int_wrapper(i) { }
 
 static void print_help(void)
 {
@@ -454,11 +457,34 @@ static int next_board_num;
 static int end_board;
 static pthread_mutex_t next_board_num_lock;
 
-int main(int argc, char * argv[])
+typedef struct {
+    int argc;
+    char * * argv;
+    int arg;
+    int stop_at;
+} context_t;
+
+int total_iterations_limit_per_board = -1;
+
+#ifndef WIN32
+typedef long long very_long_int_t;
+#else
+typedef __int64 very_long_int_t;
+#endif
+
+very_long_int_t total_num_iters = 0;
+
+static pthread_mutex_t total_num_iters_lock;
+
+void * worker_thread(void * void_context)
 {
+    context_t * context;
     pack_item_t user;
-    /* char buffer[2048]; */
+    char * error_string;
+    int arg;
+    int parser_ret;
     int ret;
+    char * * argv;
     int board_num;
     char * buffer;
     int stop_at;
@@ -467,27 +493,203 @@ int main(int argc, char * argv[])
     struct timezone tz;
 #else
     struct _timeb tb;
-#endif
-    int board_num_iters;
-    int total_num_iters_temp = 0;
-#ifndef WIN32
-    long long total_num_iters = 0;
-#else
-    __int64 total_num_iters = 0;
-#endif
-    char * error_string;
-    int parser_ret;
+#endif    
+    long total_num_iters_temp = 0;
 
-    int pack_num_iters;
-    int total_iterations_limit_per_board = -1;
+    context = (context_t *)void_context;
+    arg = context->arg;
+    argv = context->argv;
+    stop_at = context->stop_at;
+
+    user.instance = freecell_solver_user_alloc();
+
+    parser_ret =
+        freecell_solver_user_cmd_line_parse_args(
+            user.instance,
+            context->argc,
+            argv,
+            arg,
+            known_parameters,
+            cmd_line_callback,
+            &user,
+            &error_string,
+            &arg
+            );
+
+    if (parser_ret == FCS_CMD_LINE_UNRECOGNIZED_OPTION)
+    {
+        fprintf(stderr, "Unknown option: %s", argv[arg]);
+        return NULL;
+    }
+    else if (
+        (parser_ret == FCS_CMD_LINE_PARAM_WITH_NO_ARG)
+            )
+    {
+        fprintf(stderr, "The command line parameter \"%s\" requires an argument"
+                " and was not supplied with one.\n", argv[arg]);
+        return NULL;
+    }
+    else if (
+        (parser_ret == FCS_CMD_LINE_ERROR_IN_ARG)
+        )
+    {
+        if (error_string != NULL)
+        {
+            fprintf(stderr, "%s", error_string);
+            free(error_string);
+        }
+        return NULL;
+    }
+
+    ret = 0;
+
+    while (1)
+    {
+        pthread_mutex_lock(&next_board_num_lock);
+        board_num = next_board_num++;
+        pthread_mutex_unlock(&next_board_num_lock);
+
+        if (board_num > end_board)
+        {
+            break;
+        }
+
+        buffer = get_board(board_num);
+
+        freecell_solver_user_limit_iterations(user.instance, total_iterations_limit_per_board);
+
+        ret =
+            freecell_solver_user_solve_board(
+                user.instance,
+                buffer
+                );
+
+        free(buffer);
+
+
+        if (ret == FCS_STATE_SUSPEND_PROCESS)
+        {
+#ifndef WIN32
+            gettimeofday(&tv,&tz);
+            printf("Intractable Board No. %i at %li.%.6li\n",
+                board_num,
+                tv.tv_sec,
+                tv.tv_usec
+                );
+#else
+            _ftime(&tb);
+            printf("Intractable Board No. %i at %li.%.6i\n",
+                board_num,
+                tb.time,
+                tb.millitm*1000
+            );
+#endif
+            fflush(stdout);
+            print_int_wrapper(-1);
+        }
+        else if (ret == FCS_STATE_IS_NOT_SOLVEABLE)
+        {
+#ifndef WIN32
+            gettimeofday(&tv,&tz);
+            printf("Unsolved Board No. %i at %li.%.6li\n",
+                board_num,
+                tv.tv_sec,
+                tv.tv_usec
+                );
+#else
+            _ftime(&tb);
+            printf("Unsolved Board No. %i at %li.%.6i\n",
+                board_num,
+                tb.time,
+                tb.millitm*1000
+            );
+#endif
+            print_int_wrapper(-2);
+        }
+        else
+        {
+            print_int_wrapper(freecell_solver_user_get_num_times(user.instance));
+        }
+
+        total_num_iters_temp += freecell_solver_user_get_num_times(user.instance);
+        if (total_num_iters_temp > 1000000)
+        {
+            pthread_mutex_lock(&total_num_iters_lock);
+            total_num_iters += total_num_iters_temp;
+            pthread_mutex_unlock(&total_num_iters_lock);
+            total_num_iters_temp = 0;
+        }
+
+        if (board_num % stop_at == 0)
+        {
+            very_long_int_t total_num_iters_copy;
+
+            pthread_mutex_lock(&total_num_iters_lock);
+            total_num_iters_copy = (total_num_iters += total_num_iters_temp);
+            pthread_mutex_unlock(&total_num_iters_lock);
+            total_num_iters_temp = 0;
+
+#ifndef WIN32
+            gettimeofday(&tv,&tz);
+            printf("Reached Board No. %i at %li.%.6li (total_num_iters=%lli)\n",
+                board_num,
+                tv.tv_sec,
+                tv.tv_usec,
+                total_num_iters_copy
+                );
+#else
+            _ftime(&tb);
+            printf(
+#ifdef __GNUC__
+                    "Reached Board No. %i at %li.%.6i (total_num_iters=%lli)\n",
+#else
+                    "Reached Board No. %i at %li.%.6i (total_num_iters=%I64i)\n",
+#endif
+                board_num,
+                tb.time,
+                tb.millitm*1000,
+                total_num_iters_copy
+            );
+#endif
+            fflush(stdout);
+
+        }
+
+
+        freecell_solver_user_recycle(user.instance);
+    }
+
+    freecell_solver_user_free(user.instance);
+
+    return NULL;
+}
+
+
+int main(int argc, char * argv[])
+{
+    /* char buffer[2048]; */
+    int stop_at;
+#ifndef WIN32
+    struct timeval tv;
+    struct timezone tz;
+#else
+    struct _timeb tb;
+#endif
+
+
+    int num_workers = 3;
+    pthread_t * workers;
 
     char * binary_output_filename = NULL;
 
     binary_output_t binary_output;
 
-    int arg = 1, start_from_arg;
+    int arg = 1, start_from_arg, idx, check;
+
+    context_t context;
 
     next_board_num_lock = initial_mutex_constant;
+    total_num_iters_lock = initial_mutex_constant;
     if (argc < 4)
     {
         fprintf(stderr, "Not Enough Arguments!\n");
@@ -522,6 +724,17 @@ int main(int argc, char * argv[])
             }
             total_iterations_limit_per_board = atoi(argv[arg]);
         }
+        else if (!strcmp(argv[arg], "--num-workers"))
+        {
+            arg++;
+            if (arg == argc)
+            {
+                fprintf(stderr, "--num-workers came without an argument!\n");
+                print_help();
+                exit(-1);
+            }
+            num_workers = atoi(argv[arg]);
+        }
         else
         {
             break;
@@ -529,8 +742,6 @@ int main(int argc, char * argv[])
     }
 
     start_from_arg = arg;
-
-
 
     /* for(board_num=1;board_num<100000;board_num++) */
 #ifndef WIN32
@@ -615,175 +826,30 @@ int main(int argc, char * argv[])
         binary_output.file = NULL;
     }
 
-    user.instance = freecell_solver_user_alloc();
+    context.argc = argc;
+    context.argv = argv;
+    context.arg = start_from_arg;
+    context.stop_at = stop_at;
 
-    arg = start_from_arg;
+    workers = malloc(sizeof(workers[0])*num_workers);
 
-    parser_ret =
-        freecell_solver_user_cmd_line_parse_args(
-            user.instance,
-            argc,
-            argv,
-            arg,
-            known_parameters,
-            cmd_line_callback,
-            &user,
-            &error_string,
-            &arg
-            );
-
-    if (parser_ret == FCS_CMD_LINE_UNRECOGNIZED_OPTION)
+    for ( idx = 0 ; idx < num_workers ; idx++)
     {
-        fprintf(stderr, "Unknown option: %s", argv[arg]);
-        return (-1);
-    }
-    else if (
-        (parser_ret == FCS_CMD_LINE_PARAM_WITH_NO_ARG)
-            )
-    {
-        fprintf(stderr, "The command line parameter \"%s\" requires an argument"
-                " and was not supplied with one.\n", argv[arg]);
-        return (-1);
-    }
-    else if (
-        (parser_ret == FCS_CMD_LINE_ERROR_IN_ARG)
-        )
-    {
-        if (error_string != NULL)
-        {
-            fprintf(stderr, "%s", error_string);
-            free(error_string);
-        }
-        return (-1);
+        check = pthread_create(
+            &workers[idx],
+            NULL,
+            worker_thread,
+            &context
+        );
     }
 
-
-
-    ret = 0;
-
-    // for(board_num=start_board;board_num<=end_board;board_num++)
-    while (1)
+    while(1)
     {
-        pthread_mutex_lock(&next_board_num_lock);
-        board_num = next_board_num++;
-        pthread_mutex_unlock(&next_board_num_lock);
-
-        if (board_num > end_board)
-        {
-            break;
-        }
-
-        buffer = get_board(board_num);
-
-        board_num_iters = 0;
-
-        pack_num_iters = 0;
-
-        freecell_solver_user_limit_iterations(user.instance, total_iterations_limit_per_board);
-
-        ret =
-            freecell_solver_user_solve_board(
-                user.instance,
-                buffer
-                );
-
-        free(buffer);
-
-
-        if (ret == FCS_STATE_SUSPEND_PROCESS)
-        {
-#ifndef WIN32
-            gettimeofday(&tv,&tz);
-            printf("Intractable Board No. %i at %li.%.6li\n",
-                board_num,
-                tv.tv_sec,
-                tv.tv_usec
-                );
-#else
-            _ftime(&tb);
-            printf("Intractable Board No. %i at %li.%.6i\n",
-                board_num,
-                tb.time,
-                tb.millitm*1000
-            );
-#endif
-            fflush(stdout);
-            print_int_wrapper(-1);
-        }
-        else if (ret == FCS_STATE_IS_NOT_SOLVEABLE)
-        {
-#ifndef WIN32
-            gettimeofday(&tv,&tz);
-            printf("Unsolved Board No. %i at %li.%.6li\n",
-                board_num,
-                tv.tv_sec,
-                tv.tv_usec
-                );
-#else
-            _ftime(&tb);
-            printf("Unsolved Board No. %i at %li.%.6i\n",
-                board_num,
-                tb.time,
-                tb.millitm*1000
-            );
-#endif
-            print_int_wrapper(-2);
-        }
-        else
-        {
-            print_int_wrapper(freecell_solver_user_get_num_times(user.instance));
-        }
-
-        total_num_iters_temp += freecell_solver_user_get_num_times(user.instance);
-        if (total_num_iters_temp > 1000000)
-        {
-            total_num_iters += total_num_iters_temp;
-            total_num_iters_temp = 0;
-        }
-        if (board_num % stop_at == 0)
-        {
-            total_num_iters += total_num_iters_temp;
-            total_num_iters_temp = 0;
-
-
-#ifndef WIN32
-            gettimeofday(&tv,&tz);
-            printf("Reached Board No. %i at %li.%.6li (total_num_iters=%lli)\n",
-                board_num,
-                tv.tv_sec,
-                tv.tv_usec,
-                total_num_iters
-                );
-#else
-            _ftime(&tb);
-            printf(
-#ifdef __GNUC__
-                    "Reached Board No. %i at %li.%.6i (total_num_iters=%lli)\n",
-#else
-                    "Reached Board No. %i at %li.%.6i (total_num_iters=%I64i)\n",
-#endif
-                board_num,
-                tb.time,
-                tb.millitm*1000,
-                total_num_iters
-            );
-#endif
-            fflush(stdout);
-
-        }
-
-
-        freecell_solver_user_recycle(user.instance);
+        sleep(3);
     }
 
-    freecell_solver_user_free(user.instance);
-
-    if (binary_output_filename)
-    {
-        fwrite(binary_output.buffer, 1, binary_output.ptr - binary_output.buffer, binary_output.file);
-        fflush(binary_output.file);
-        fclose(binary_output.file);
-    }
+    free(workers);
 
     return 0;
 }
+
