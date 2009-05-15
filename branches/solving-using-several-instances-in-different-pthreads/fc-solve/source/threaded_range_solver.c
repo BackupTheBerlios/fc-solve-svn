@@ -33,6 +33,7 @@
 #include <sys/types.h>
 #include <sys/timeb.h>
 #endif
+#include <pthread.h>
 
 #include "fcs_user.h"
 #include "fcs_cl.h"
@@ -445,6 +446,14 @@ int read_int(FILE * f, int * dest)
     return 0;
 }
 
+static const pthread_mutex_t initial_mutex_constant =
+    PTHREAD_MUTEX_INITIALIZER
+    ;
+
+static int next_board_num;
+static int end_board;
+static pthread_mutex_t next_board_num_lock;
+
 int main(int argc, char * argv[])
 {
     pack_item_t user;
@@ -452,7 +461,7 @@ int main(int argc, char * argv[])
     int ret;
     int board_num;
     char * buffer;
-    int start_board, end_board, stop_at;
+    int stop_at;
 #ifndef WIN32
     struct timeval tv;
     struct timezone tz;
@@ -476,15 +485,16 @@ int main(int argc, char * argv[])
 
     binary_output_t binary_output;
 
-
     int arg = 1, start_from_arg;
+
+    next_board_num_lock = initial_mutex_constant;
     if (argc < 4)
     {
         fprintf(stderr, "Not Enough Arguments!\n");
         print_help();
         exit(-1);
     }
-    start_board = atoi(argv[arg++]);
+    next_board_num = atoi(argv[arg++]);
     end_board = atoi(argv[arg++]);
     stop_at = atoi(argv[arg++]);
 
@@ -557,7 +567,7 @@ int main(int argc, char * argv[])
                 exit(-1);
             }
 
-            print_int_wrapper(start_board);
+            print_int_wrapper(next_board_num);
             print_int_wrapper(end_board);
             print_int_wrapper(total_iterations_limit_per_board);
         }
@@ -574,7 +584,7 @@ int main(int argc, char * argv[])
                     exit(-1);       \
                 }       \
             }
-            read_int_wrapper(start_board);
+            read_int_wrapper(next_board_num);
             read_int_wrapper(end_board);
             read_int_wrapper(total_iterations_limit_per_board);
 
@@ -585,8 +595,8 @@ int main(int argc, char * argv[])
                 fprintf(stderr, "%s", "Output file has an invalid length. Terminating.\n");
                 exit(-1);
             }
-            start_board += (file_len-12)/4;
-            if (start_board >= end_board)
+            next_board_num += (file_len-12)/4;
+            if (next_board_num >= end_board)
             {
                 fprintf(stderr, "%s", "Output file was already finished being generated.\n");
                 exit(-1);
@@ -651,10 +661,18 @@ int main(int argc, char * argv[])
 
     ret = 0;
 
-
-
-    for(board_num=start_board;board_num<=end_board;board_num++)
+    // for(board_num=start_board;board_num<=end_board;board_num++)
+    while (1)
     {
+        pthread_mutex_lock(&next_board_num_lock);
+        board_num = next_board_num++;
+        pthread_mutex_unlock(&next_board_num_lock);
+
+        if (board_num > end_board)
+        {
+            break;
+        }
+
         buffer = get_board(board_num);
 
         board_num_iters = 0;
