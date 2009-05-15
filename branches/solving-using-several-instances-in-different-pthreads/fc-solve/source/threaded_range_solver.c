@@ -473,8 +473,11 @@ typedef __int64 very_long_int_t;
 #endif
 
 very_long_int_t total_num_iters = 0;
-
 static pthread_mutex_t total_num_iters_lock;
+
+static int num_finished_threads = 0;
+static pthread_mutex_t num_finished_threads_lock;
+
 
 void * worker_thread(void * void_context)
 {
@@ -519,7 +522,7 @@ void * worker_thread(void * void_context)
     if (parser_ret == FCS_CMD_LINE_UNRECOGNIZED_OPTION)
     {
         fprintf(stderr, "Unknown option: %s", argv[arg]);
-        return NULL;
+        goto ret_label;
     }
     else if (
         (parser_ret == FCS_CMD_LINE_PARAM_WITH_NO_ARG)
@@ -527,7 +530,7 @@ void * worker_thread(void * void_context)
     {
         fprintf(stderr, "The command line parameter \"%s\" requires an argument"
                 " and was not supplied with one.\n", argv[arg]);
-        return NULL;
+        goto ret_label;
     }
     else if (
         (parser_ret == FCS_CMD_LINE_ERROR_IN_ARG)
@@ -538,7 +541,7 @@ void * worker_thread(void * void_context)
             fprintf(stderr, "%s", error_string);
             free(error_string);
         }
-        return NULL;
+        goto ret_label;
     }
 
     ret = 0;
@@ -660,6 +663,11 @@ void * worker_thread(void * void_context)
     }
 
     freecell_solver_user_free(user.instance);
+
+ret_label:
+    pthread_mutex_lock(&num_finished_threads_lock);
+    num_finished_threads++;
+    pthread_mutex_unlock(&num_finished_threads_lock);
 
     return NULL;
 }
@@ -843,10 +851,37 @@ int main(int argc, char * argv[])
         );
     }
 
-    while(1)
+#define num_finished_threads_copy idx
+
+    do 
     {
-        sleep(3);
-    }
+        sleep(1);
+
+        pthread_mutex_lock(&num_finished_threads_lock);
+        num_finished_threads_copy = num_finished_threads;
+        pthread_mutex_unlock(&num_finished_threads_lock);
+    } while (num_finished_threads_copy != num_workers);
+
+#ifndef WIN32
+            gettimeofday(&tv,&tz);
+            printf("Finished at %li.%.6li (total_num_iters=%lli)\n",
+                tv.tv_sec,
+                tv.tv_usec,
+                total_num_iters
+                );
+#else
+            _ftime(&tb);
+            printf(
+#ifdef __GNUC__
+                    "Finished at %li.%.6i (total_num_iters=%lli)\n",
+#else
+                    "Finshed at %li.%.6i (total_num_iters=%I64i)\n",
+#endif
+                tb.time,
+                tb.millitm*1000,
+                total_num_iters
+            );
+#endif
 
     free(workers);
 
