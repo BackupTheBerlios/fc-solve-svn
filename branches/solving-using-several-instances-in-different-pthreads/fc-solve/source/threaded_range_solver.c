@@ -655,16 +655,19 @@ void * worker_thread(void * void_context)
             );
 #endif
             fflush(stdout);
-
         }
-
 
         freecell_solver_user_recycle(user.instance);
     }
 
+    pthread_mutex_lock(&total_num_iters_lock);
+    total_num_iters += total_num_iters_temp;
+    pthread_mutex_unlock(&total_num_iters_lock);
+
     freecell_solver_user_free(user.instance);
 
 ret_label:
+
     pthread_mutex_lock(&num_finished_threads_lock);
     num_finished_threads++;
     pthread_mutex_unlock(&num_finished_threads_lock);
