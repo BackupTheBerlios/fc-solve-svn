@@ -13,7 +13,7 @@ use Wx::Event qw(EVT_PAINT);
 use base 'Wx::Window';
 
 use Games::Nurikabe::Solver::Board;
-use Games::Nurikabe::Solver::Cell qw($NK_UNKNOWN $NK_WHITE $NK_BLACK);
+use Games::Nurikabe::Solver::Constants qw($NK_UNKNOWN $NK_WHITE $NK_BLACK);
 
 my $cell_width = 30;
 my $cell_height = 30;
