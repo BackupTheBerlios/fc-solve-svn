@@ -173,6 +173,7 @@ sub OnInit
             adjacent_whites
             distance_from_islands
             fully_expand_island
+            expand_black_regions
         )]
     );
     $sizer->Add($frame->{list}, 1, wxALL(), 10);
