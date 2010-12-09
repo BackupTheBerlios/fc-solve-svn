@@ -4,7 +4,8 @@ use warnings;
 use strict;
 
 use base 'Games::Nurikabe::Solver::Base';
-use base 'Exporter';
+
+use Games::Nurikabe::Solver::Constants;
 
 =head1 NAME
 
@@ -41,12 +42,6 @@ __PACKAGE__->mk_accessors(qw(
 =head1 FUNCTIONS
 
 =cut
-
-our $NK_UNKNOWN = 0;
-our $NK_WHITE = 1;
-our $NK_BLACK = 2;
-
-our @EXPORT_OK = (qw($NK_BLACK $NK_WHITE $NK_UNKNOWN));
 
 sub _init
 {

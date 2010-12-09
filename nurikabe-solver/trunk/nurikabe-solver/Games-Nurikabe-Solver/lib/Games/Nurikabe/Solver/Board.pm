@@ -7,7 +7,9 @@ use List::MoreUtils qw(all);
 
 use base 'Games::Nurikabe::Solver::Base';
 
-use Games::Nurikabe::Solver::Cell qw($NK_UNKNOWN $NK_WHITE $NK_BLACK);
+use Games::Nurikabe::Solver::Cell;
+use Games::Nurikabe::Solver::Constants;
+
 use Games::Nurikabe::Solver::Island;
 use Games::Nurikabe::Solver::Move;
 

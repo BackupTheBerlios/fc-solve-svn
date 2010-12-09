@@ -7,7 +7,8 @@ use Test::More tests => 10;
 
 use Test::Differences;
 
-use Games::Nurikabe::Solver::Cell qw($NK_UNKNOWN $NK_WHITE $NK_BLACK);
+use Games::Nurikabe::Solver::Cell;
+use Games::Nurikabe::Solver::Constants qw($NK_UNKNOWN $NK_WHITE $NK_BLACK);
 use Games::Nurikabe::Solver::Board;
 
 {

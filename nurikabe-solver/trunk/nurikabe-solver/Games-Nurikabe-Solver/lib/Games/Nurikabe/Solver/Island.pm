@@ -5,7 +5,8 @@ use warnings;
 
 use base 'Games::Nurikabe::Solver::Base';
 
-use Games::Nurikabe::Solver::Cell qw($NK_UNKNOWN $NK_WHITE $NK_BLACK);
+use Games::Nurikabe::Solver::Cell;
+use Games::Nurikabe::Solver::Constants qw($NK_UNKNOWN $NK_WHITE $NK_BLACK);
 
 =head1 NAME
 

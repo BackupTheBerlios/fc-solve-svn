@@ -4,7 +4,9 @@ use warnings;
 use strict;
 
 use base 'Games::Nurikabe::Solver::Base';
-use Games::Nurikabe::Solver::Cell qw($NK_UNKNOWN $NK_WHITE $NK_BLACK);
+
+use Games::Nurikabe::Solver::Cell;
+use Games::Nurikabe::Solver::Constants;
 
 =head1 NAME
 
