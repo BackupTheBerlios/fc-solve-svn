@@ -56,6 +56,24 @@ Should not be used directly.
 
 =cut
 
+sub _vicinity_loop
+{
+    my ($board, $coords, $callback) = @_;
+
+    my $cell = $board->get_cell($coords);
+
+    foreach my $off_coords (
+        grep { $board->_is_in_bounds($_) }
+        map { $board->add_offset($coords, $_) }
+        ([-1,0],[0,-1],[0,1],[1,0])
+    )
+    {
+        $callback->($off_coords);
+    }
+
+    return;
+}
+
 sub _get_init_verdict_marked_cells
 {
     my $self = shift;
@@ -751,8 +769,7 @@ sub _solve_using_expand_black_regions
                     }
 
                     $q_c->already_processed(1);
-                    $q_c->_vicinity_loop(
-                        $self,
+                    $self->_vicinity_loop(
                         $coords,
                         sub {
                             my $to_check = shift;

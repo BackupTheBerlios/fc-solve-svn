@@ -112,8 +112,7 @@ sub surround
     my @ret;
     foreach my $cell (@{$self->known_cells()})
     {
-        $board->get_cell($cell)->_vicinity_loop(
-            $board,
+        $board->_vicinity_loop(
             $cell,
             sub {
                 my $to_check = shift;
@@ -177,7 +176,7 @@ sub _reachable_brfs_scan_handle_item
         return;
     }
     
-    $board->get_cell($c)->_vicinity_loop($board, $c,
+    $board->_vicinity_loop($c,
         sub {
             my $to_check = shift;
 
