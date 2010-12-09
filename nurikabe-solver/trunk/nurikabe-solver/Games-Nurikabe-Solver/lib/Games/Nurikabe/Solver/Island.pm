@@ -49,14 +49,14 @@ sub _sort_coords
 
     return
     [
-        sort { ($a->[0] <=> $b->[0]) || ($a->[1] <=> $b->[1]) }
+        sort { ($a->y <=> $b->y) || ($a->x <=> $b->x) }
         @$coords
     ];
 }
 
 =head1 FUNCTIONS
 
-=head2 $island = Games::Nurikabe::Solver::Island->new( {idx => $index, known_cells => [[0,0],[0,1]] })
+=head2 $island = Games::Nurikabe::Solver::Island->new( {idx => $index, known_cells => [@coords] })
 
 Initialises a new island.
 
@@ -106,19 +106,13 @@ sub surround
     my $board = $args->{'board'};
 
     my %exclude_coords =
-        (map { join(",", @$_) => 1, }
+        (map { $_->to_s() => 1, }
             @{$self->known_cells()},
         );
 
     my @ret;
-    foreach my $cell_pair (@{$self->known_cells()})
+    foreach my $cell_coords (@{$self->known_cells()})
     {
-        my $cell_coords = Games::Nurikabe::Solver::Coords->new(
-            {
-                y => $cell_pair->[0], x => $cell_pair->[1]
-            }
-        );
-
         $board->_vicinity_loop(
             $cell_coords,
             sub {
@@ -127,7 +121,7 @@ sub surround
 
                 if (!exists($exclude_coords{$s}))
                 {
-                    push @ret, $to_check->_to_pair(); 
+                    push @ret, $to_check; 
                     # Make sure we don't repeat ourselves
                     $exclude_coords{$s} = 1;
                 }
@@ -142,7 +136,7 @@ sub _init_queue
 {
     my $island = shift;
 
-    $island->_queue([map { [0,$_] } @{$island->known_cells()}]);
+    $island->_queue([map { [0,$_->_to_pair()] } @{$island->known_cells()}]);
 
     return;
 }
@@ -245,7 +239,12 @@ sub add_white_cells
 
     foreach my $coord (@$new_cells)
     {
-        push @{$self->known_cells()}, [@$coord];
+        push @{$self->known_cells()}, 
+            Games::Nurikabe::Solver::Coords->new(
+                {
+                y => $coord->[0], x => $coord->[1]
+                }
+            );
         $board->_mark_as_white($coord, $self->idx);
     }
 

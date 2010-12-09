@@ -43,7 +43,7 @@ sub assign_board
     foreach my $island (@{$self->{board}->_islands()})
     {
         my $cell = $island->known_cells->[0];
-        $self->{numbers}->{join(",", @$cell)} = $island->order();
+        $self->{numbers}->{$cell->to_s()} = $island->order();
     }
 }
 

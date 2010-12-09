@@ -232,7 +232,11 @@ sub load_from_string
                     Games::Nurikabe::Solver::Island->new(
                         {
                             idx => $index,
-                            known_cells => [[$y,$x]],
+                            known_cells => [
+                                Games::Nurikabe::Solver::Coords->new(
+                                    { y => $y, x => $x}
+                                )
+                            ],
                             order => $num_cells,
                         },
                     );
@@ -445,7 +449,7 @@ sub _solve_using_surround_island
 
             foreach my $coords (@$black_cells)
             {
-                $self->_mark_as_black($coords);
+                $self->_mark_as_black($coords->_to_pair);
             }
             
             $self->_add_move(
@@ -643,8 +647,7 @@ sub _solve_using_distance_from_islands
 
         foreach my $coords (@$non_traverse)
         {
-            $self->get_cell(
-                Games::Nurikabe::Solver::Coords->new({y => $coords->[0], x => $coords->[1]}))->island_in_proximity($island->idx());
+            $self->get_cell($coords)->island_in_proximity($island->idx());
         }
     }
 
@@ -689,8 +692,7 @@ sub _solve_using_fully_expand_island
 
         foreach my $coords (@$non_traverse)
         {
-            $self->get_cell(
-                Games::Nurikabe::Solver::Coords->new({ y => $coords->[0], x => $coords->[1]}))->island_in_proximity($island->idx());
+            $self->get_cell($coords)->island_in_proximity($island->idx());
         }
     }
 

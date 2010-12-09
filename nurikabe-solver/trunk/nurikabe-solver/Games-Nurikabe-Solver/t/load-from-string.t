@@ -11,6 +11,13 @@ use Games::Nurikabe::Solver::Cell;
 use Games::Nurikabe::Solver::Constants qw($NK_UNKNOWN $NK_WHITE $NK_BLACK);
 use Games::Nurikabe::Solver::Board;
 
+sub _island_cells_dump
+{
+    my $island = shift;
+
+    return [map { [$_->y,$_->x] } @{$island->known_cells()}];
+}
+
 {
     my $string_representation = <<"EOF";
 Width=5 Height=5
@@ -65,7 +72,7 @@ EOF
 
     # TEST
     eq_or_diff (
-        $board->get_island(0)->known_cells(),
+        _island_cells_dump($board->get_island(0)),
         [[0,3]], 
         "known_cells of island 0",
     );
@@ -78,7 +85,7 @@ EOF
 
     # TEST
     eq_or_diff (
-        $board->get_island(2)->known_cells(),
+        _island_cells_dump($board->get_island(2)),
         [[3,3]], 
         "known_cells of island 2",
     );

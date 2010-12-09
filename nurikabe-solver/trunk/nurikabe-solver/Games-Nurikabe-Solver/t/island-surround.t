@@ -53,7 +53,16 @@ sub is_island_surround
             {
                 idx => 0,
                 order => scalar(@$white_cells),
-                known_cells => $white_cells,
+                known_cells =>
+                [ 
+                    map 
+                    { 
+                        Games::Nurikabe::Solver::Coords->new(
+                            { y => $_->[0], x => $_->[1] }
+                        )
+                    }
+                    @$white_cells
+                ],
             }
         );
 
@@ -65,7 +74,7 @@ sub is_island_surround
         );
 
     return eq_or_diff(
-        $got_surrounded_cells,
+        [map { $_->_to_pair() } @{$got_surrounded_cells}],
         $bi->positions("B"),
         $blurb
     );
