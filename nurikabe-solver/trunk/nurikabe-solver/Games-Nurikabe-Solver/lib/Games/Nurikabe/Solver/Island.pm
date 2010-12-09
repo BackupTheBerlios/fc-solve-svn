@@ -220,30 +220,24 @@ sub mark_reachable_brfs_scan
     return;
 }
 
-=head2 $island->add_white_cells( { board => $board, cells => [@list],} )
+=head2 $island->add_white_coords( { board => $board, coords => [@list],} )
 
-Add these cells now known as white to the island.
+Add these coords now known as white to the island.
 
 =cut
 
-sub add_white_cells
+sub add_white_coords
 {
     my ($self, $args) = @_;
 
     my $board = $args->{'board'};
-    my $new_cells = $args->{'cells'};
+    my $new_coords = $args->{'coords'};
 
-    foreach my $coord (@$new_cells)
+    foreach my $coord (@$new_coords)
     {
-        my $c = Games::Nurikabe::Solver::Coords->new(
-            {
-                y => $coord->[0], x => $coord->[1]
-            }
-        );
+        push @{$self->known_cells()}, $coord;
 
-        push @{$self->known_cells()}, $c;
-
-        $board->_mark_as_white($c, $self->idx);
+        $board->_mark_as_white($coord, $self->idx);
     }
 
     $self->known_cells($self->_sort_coords($self->known_cells()));

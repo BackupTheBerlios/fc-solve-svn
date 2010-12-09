@@ -689,7 +689,7 @@ sub _solve_using_fully_expand_island
         $island->mark_reachable_brfs_scan({board => $self});
     }
 
-    my @island_reachable_cells = (map { [] } @{$self->_islands()});
+    my @island_reachable_coords = (map { [] } @{$self->_islands()});
 
     # Now mark the unreachable states.
     $self->_cells_loop(
@@ -704,7 +704,14 @@ sub _solve_using_fully_expand_island
                 {
                     if (defined($cell->_island_reachable->[$idx]))
                     {
-                        push @{$island_reachable_cells[$idx]}, [@$coords];
+                        push @{$island_reachable_coords[$idx]}, 
+                            Games::Nurikabe::Solver::Coords->new(
+                                {
+                                    y => $coords->[0],
+                                    x => $coords->[1],
+                                }
+                            )
+                            ;
                     }
                 }
             }
@@ -717,15 +724,15 @@ sub _solve_using_fully_expand_island
     {
         my $island = $self->_islands->[$idx];
 
-        my $count = @{$island_reachable_cells[$idx]} + @{$island->known_cells};
+        my $count = @{$island_reachable_coords[$idx]} + @{$island->known_cells};
 
         # We can mark all these cells as white, since the island is full.
         if ($count == $island->order())
         {
             $moved = 1;
-            $island->add_white_cells({
+            $island->add_white_coords({
                     board => $self,
-                    cells => $island_reachable_cells[$idx]
+                    coords => $island_reachable_coords[$idx]
                 }
             );
         }
