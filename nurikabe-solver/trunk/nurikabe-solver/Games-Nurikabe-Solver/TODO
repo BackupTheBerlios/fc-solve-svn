@@ -1,0 +1,4 @@
+* Add a coords class instead of passing the coordinates as an array reference
+of two elements.
+    - Implement - to_s().
+    - a from_s() constructor.
