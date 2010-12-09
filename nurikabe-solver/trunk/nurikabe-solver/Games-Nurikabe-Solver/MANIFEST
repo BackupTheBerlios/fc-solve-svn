@@ -8,6 +8,7 @@ lib/Games/Nurikabe/Solver/Base.pm
 lib/Games/Nurikabe/Solver/Board.pm
 lib/Games/Nurikabe/Solver/Cell.pm
 lib/Games/Nurikabe/Solver/Constants.pm
+lib/Games/Nurikabe/Solver/Coords.pm
 lib/Games/Nurikabe/Solver/Island.pm
 lib/Games/Nurikabe/Solver/Move.pm
 lib/Games/Nurikabe/Solver.pm

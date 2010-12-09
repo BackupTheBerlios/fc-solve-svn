@@ -80,7 +80,9 @@ sub OnPaint
     {
         for my $x (0 .. $board->_width()-1)
         {
-            my $status = $board->get_cell([$y,$x])->status();
+            my $status = $board->get_cell(
+                Games::Nurikabe::Solver::Coords->new({y =>$y, x => $x})
+            )->status();
 
             if ($status eq $NK_UNKNOWN)
             {

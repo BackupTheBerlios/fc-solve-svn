@@ -26,26 +26,33 @@ EOF
             $string_representation
         );
 
+    my $get_cell = sub {
+        my $xy = shift;
+        return $board->get_cell(
+            Games::Nurikabe::Solver::Coords->new($xy)
+        );
+    };
+
     # TEST
-    is ($board->get_cell([0,0])->status(),
+    is ($get_cell->({y => 0, x => 0})->status(),
         $NK_UNKNOWN,
         "Checking Status of Cell (0,0)",
     );
 
     # TEST
-    is ($board->get_cell([0,2])->status(),
+    is ($get_cell->({ y => 0, x => 2})->status(),
         $NK_UNKNOWN,
         "Checking Status of Cell (0,2)",
     );
 
     # TEST
-    is ($board->get_cell([0,3])->status(),
+    is ($get_cell->({ y => 0, x => 3})->status(),
         $NK_WHITE,
         "Status of Cell (0,3) - White"
     );
 
     # TEST
-    is ($board->get_cell([0,3])->island(),
+    is ($get_cell->({ y => 0, x => 3})->island(),
         0,
         "Island of Cell (0,4) - 0"
     );

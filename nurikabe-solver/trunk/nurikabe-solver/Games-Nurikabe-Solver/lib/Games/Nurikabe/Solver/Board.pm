@@ -60,7 +60,11 @@ sub _vicinity_loop
 {
     my ($board, $coords, $callback) = @_;
 
-    my $cell = $board->get_cell($coords);
+    my $cell = $board->get_cell(
+        Games::Nurikabe::Solver::Coords->new(
+            { y => $coords->[0], x => $coords->[1]}
+        )
+    );
 
     foreach my $off_coords (
         grep { $board->_is_in_bounds($_) }
@@ -255,9 +259,10 @@ sub load_from_string
     return $self;
 }
 
-=head2 $self->get_cell( [$y,$x] )
+=head2 $self->get_cell( $coords )
 
-Returns the cell in position ($y, $x). It is a
+Returns the cell in position of $coords where $coords is a
+L<Games::Nurikabe::Solver::Coords> object. It is a
 L<Games::Nurikabe::Solver::Cell> object.
 
 =cut
@@ -267,7 +272,7 @@ sub get_cell
     my $self = shift;
     my $c = shift;
 
-    return $self->_cells()->[$c->[0]]->[$c->[1]];
+    return $self->_cells()->[$c->y]->[$c->x];
 }
 
 =head2 $self->get_island($idx)
@@ -325,7 +330,14 @@ sub _actual_mark
 {
     my ($self, $coords, $verdict) = @_;
 
-    $self->get_cell($coords)->status($verdict);
+    $self->get_cell(
+        Games::Nurikabe::Solver::Coords->new(
+            {
+                y => $coords->[0],
+                x => $coords->[1],
+            }
+        )
+    )->status($verdict);
 
     push @{$self->_verdict_marked_cells()->{$verdict}},
         $coords
@@ -338,7 +350,12 @@ sub _mark_as_black
 {
     my ($self, $c) = @_;
 
-    my $cell = $self->get_cell($c);
+    my $cell = $self->get_cell(
+        Games::Nurikabe::Solver::Coords->new
+        (
+            { y => $c->[0], x => $c->[1] }
+        )
+    );
 
     if ($cell->status() eq $NK_WHITE)
     {
@@ -361,7 +378,14 @@ sub _mark_as_white
 {
     my ($self, $c, $idx) = @_;
 
-    my $cell = $self->get_cell($c);
+    my $cell = $self->get_cell(
+        Games::Nurikabe::Solver::Coords->new(
+            {
+                y => $c->[0],
+                x => $c->[1],
+            }
+        ),
+    );
 
     if ($cell->status() eq $NK_BLACK)
     {
@@ -490,7 +514,7 @@ sub _solve_using_surrounded_by_blacks
                 return;
             }
 
-            if (all { $self->get_cell($_)->status() eq $NK_BLACK }
+            if (all { $self->get_cell(Games::Nurikabe::Solver::Coords->new({y => $_->[1], x => $_->[0] } ))->status() eq $NK_BLACK }
                 (@{$self->_calc_vicinity($coords)})
             )
             {
@@ -524,7 +548,7 @@ sub _adj_whites_handle_shape
         return;
     }
 
-    my $other_cell = $self->get_cell($other_coords);
+    my $other_cell = $self->get_cell(Games::Nurikabe::Solver::Coords->new({y => $other_coords->[0], x => $other_coords->[1]}));
     
     if ($other_cell->not_same_island($cell))
     {
@@ -617,7 +641,8 @@ sub _solve_using_distance_from_islands
 
         foreach my $coords (@$non_traverse)
         {
-            $self->get_cell($coords)->island_in_proximity($island->idx());
+            $self->get_cell(
+                Games::Nurikabe::Solver::Coords->new({y => $coords->[0], x => $coords->[1]}))->island_in_proximity($island->idx());
         }
     }
 
@@ -662,7 +687,8 @@ sub _solve_using_fully_expand_island
 
         foreach my $coords (@$non_traverse)
         {
-            $self->get_cell($coords)->island_in_proximity($island->idx());
+            $self->get_cell(
+                Games::Nurikabe::Solver::Coords->new({ y => $coords->[0], x => $coords->[1]}))->island_in_proximity($island->idx());
         }
     }
 
@@ -762,7 +788,8 @@ sub _solve_using_expand_black_regions
                 QUEUE_LOOP:
                 while (my $coords = shift(@queue))
                 {
-                    my $q_c = $self->get_cell($coords);
+                    my $q_c = $self->get_cell(
+                        Games::Nurikabe::Solver::Coords->new({y => $coords->[0], x => $coords->[1]}));
                     if ($q_c->already_processed)
                     {
                         next QUEUE_LOOP;
@@ -774,7 +801,8 @@ sub _solve_using_expand_black_regions
                         sub {
                             my $to_check = shift;
 
-                            my $c = $self->get_cell($to_check);
+                            my $c = $self->get_cell(
+                                Games::Nurikabe::Solver::Coords->new({ y => $to_check->[0], x => $to_check->[1]}));
 
                             if ($c->status() eq $NK_BLACK)
                             {

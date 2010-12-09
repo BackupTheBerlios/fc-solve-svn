@@ -5,6 +5,7 @@ use warnings;
 
 use base 'Games::Nurikabe::Solver::Base';
 
+use Games::Nurikabe::Solver::Coords;
 use Games::Nurikabe::Solver::Cell;
 use Games::Nurikabe::Solver::Constants qw($NK_UNKNOWN $NK_WHITE $NK_BLACK);
 
@@ -180,7 +181,14 @@ sub _reachable_brfs_scan_handle_item
         sub {
             my $to_check = shift;
 
-            my $cell = $board->get_cell($to_check);
+            my $cell = $board->get_cell(
+                Games::Nurikabe::Solver::Coords->new(
+                    {
+                        y => $to_check->[0],
+                        x => $to_check->[1],
+                    }
+                )
+            );
 
             if (! $cell->can_be_marked_by_island($island))
             {
