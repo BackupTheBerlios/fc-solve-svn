@@ -25,6 +25,7 @@ __PACKAGE__->mk_accessors(qw(
     island_in_proximity
     _reachable
     _island_reachable
+    already_processed
     ));
 
 =head1 SYNOPSIS
@@ -142,6 +143,20 @@ sub can_be_marked_by_island
     }
 
     return 1;
+}
+
+sub _vicinity_loop
+{
+    my ($self, $board, $coords, $callback) = @_;
+
+    foreach my $off_coords (
+        grep { $board->_is_in_bounds($_) }
+        map { $self->add_offset($coords, $_) }
+        ([-1,0],[0,-1],[0,1],[1,0])
+    )
+    {
+        $callback->($off_coords);
+    }
 }
 
 =head1 AUTHOR

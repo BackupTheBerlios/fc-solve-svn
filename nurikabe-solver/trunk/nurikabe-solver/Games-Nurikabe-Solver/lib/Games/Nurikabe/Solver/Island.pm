@@ -53,20 +53,6 @@ sub _sort_coords
     ];
 }
 
-sub _vicinity_loop
-{
-    my ($self, $board, $coords, $callback) = @_;
-
-    foreach my $off_coords (
-        grep { $board->_is_in_bounds($_) }
-        map { $self->add_offset($coords, $_) }
-        ([-1,0],[0,-1],[0,1],[1,0])
-    )
-    {
-        $callback->($off_coords);
-    }
-}
-
 =head1 FUNCTIONS
 
 =head2 $island = Games::Nurikabe::Solver::Island->new( {idx => $index, known_cells => [[0,0],[0,1]] })
@@ -126,7 +112,9 @@ sub surround
     my @ret;
     foreach my $cell (@{$self->known_cells()})
     {
-        $self->_vicinity_loop($board, $cell,
+        $board->get_cell($cell)->_vicinity_loop(
+            $board,
+            $cell,
             sub {
                 my $to_check = shift;
                 my $s = join(",",@$to_check);
@@ -189,7 +177,7 @@ sub _reachable_brfs_scan_handle_item
         return;
     }
     
-    $island->_vicinity_loop($board, $c,
+    $board->get_cell($c)->_vicinity_loop($board, $c,
         sub {
             my $to_check = shift;
 

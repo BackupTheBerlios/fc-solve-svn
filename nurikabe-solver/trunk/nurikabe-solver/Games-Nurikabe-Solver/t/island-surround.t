@@ -11,7 +11,7 @@ use lib './t/lib';
 
 use Games::Nurikabe::Solver::Test::BoardInput;
 
-use Games::Nurikabe::Solver::Cell qw($NK_UNKNOWN $NK_WHITE $NK_BLACK);
+use Games::Nurikabe::Solver::Constants qw($NK_UNKNOWN $NK_WHITE $NK_BLACK);
 use Games::Nurikabe::Solver::Board;
 use Games::Nurikabe::Solver::Island;
 
@@ -22,6 +22,20 @@ sub is_island_surround
 
     my $bi = BoardInput->from_s($board_s);
 
+    my @cells =
+    (
+        map
+        {
+        [ 
+            map { 
+            Games::Nurikabe::Solver::Cell->new(
+                { status => $NK_UNKNOWN }
+                )
+            } (0 .. ($bi->width() - 1))
+        ]
+        } (0 .. ($bi->height() -1))
+    );
+
     my $board =
         Games::Nurikabe::Solver::Board->new(
             {
@@ -29,6 +43,8 @@ sub is_island_surround
                 height => $bi->height(),
             }
         );
+
+    $board->_cells(\@cells);
 
     my $white_cells = $bi->positions("W");
 

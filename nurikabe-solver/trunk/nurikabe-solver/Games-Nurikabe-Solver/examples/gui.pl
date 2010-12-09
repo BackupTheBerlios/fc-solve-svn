@@ -172,6 +172,7 @@ sub OnInit
             surrounded_by_blacks
             adjacent_whites
             distance_from_islands
+            fully_expand_island
         )]
     );
     $sizer->Add($frame->{list}, 1, wxALL(), 10);

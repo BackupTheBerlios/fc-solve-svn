@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 80;
+use Test::More tests => 84;
 
 use Test::Differences;
 
@@ -689,4 +689,83 @@ EOF
     {
         diag($verdict);
     }
+}
+
+# Test expand_black_regions.
+
+{
+    my $string_representation = <<"EOF";
+Width=5 Height=5
+[] [6] [] [] []
+[] [] [] [2] []
+[] [] [] [] []
+[] [1] [] [] []
+[] [] [] [2] []
+EOF
+
+    my $board =
+        Games::Nurikabe::Solver::Board->load_from_string(
+            $string_representation
+        );
+
+    # First solve using the existing methods until there are no moves left.
+    my $found_moves = 1;
+
+    while ($found_moves)
+    {
+        $found_moves = 0;
+
+        foreach my $method (qw(
+            surround_island
+            surrounded_by_blacks
+            adjacent_whites
+            distance_from_islands
+            fully_expand_island
+            )
+        )
+        {
+            my $moves = $board->_solve_using(
+                {
+                    name => $method,
+                    params => {},
+                }
+            );
+
+            if (@$moves)
+            {
+                $found_moves = 1;
+            }
+        }
+    }
+
+    my $moves = $board->_solve_using(
+        {
+            name => "expand_black_regions",
+            params => {},
+        }
+    );
+
+    my $m = MyMove->new({move => shift(@$moves)});
+
+    # TEST
+    eq_or_diff(
+        $moves,
+        [],
+        "No remaining moves except the first one."
+    );
+
+    # TEST
+    is ($m->reason(), "expand_black_regions", "Reason is OK.");
+
+    # TEST
+    ok (
+        $m->in_black([1,4]),
+        "Expanded cells contain (1,4)",
+    );
+
+    # TEST
+    ok (
+        $m->in_black([4,2]),
+        "Expanded cells contain (4,2)",
+    );
 }

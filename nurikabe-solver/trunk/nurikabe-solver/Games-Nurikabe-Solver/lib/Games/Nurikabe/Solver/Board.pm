@@ -710,6 +710,93 @@ sub _solve_using_fully_expand_island
     return;
 }
 
+sub _solve_using_expand_black_regions
+{
+    my $self = shift;
+
+    $self->_cells_loop(
+        sub {
+            my ($coords, $cell) = @_;
+
+            if ($cell->status() eq $NK_BLACK)
+            {
+                $cell->already_processed(0);
+            }
+        }
+    );
+
+    my $found = 0;
+
+    $self->_cells_loop(
+        sub {
+            my ($cell_coords, $cell) = @_;
+
+            if (($cell->status() eq $NK_BLACK) && (! $cell->already_processed))
+            {
+                # Perform a BrFS scan on the cell to find all adjacent black
+                # cells and the unknown cells that are adjacent to them.
+                
+                my @queue = ($cell_coords);
+
+                my %adjacent_unknowns;
+
+                # TODO : abstract all BrFS searches into a common code.
+                QUEUE_LOOP:
+                while (my $coords = shift(@queue))
+                {
+                    my $q_c = $self->get_cell($coords);
+                    if ($q_c->already_processed)
+                    {
+                        next QUEUE_LOOP;
+                    }
+
+                    $q_c->already_processed(1);
+                    $q_c->_vicinity_loop(
+                        $self,
+                        $coords,
+                        sub {
+                            my $to_check = shift;
+
+                            my $c = $self->get_cell($to_check);
+
+                            if ($c->status() eq $NK_BLACK)
+                            {
+                                if (! $c->already_processed())
+                                {
+                                    push @queue, $to_check;
+                                }
+                            }
+                            elsif ($c->status() eq $NK_UNKNOWN)
+                            {
+                                $adjacent_unknowns{join(",",@$to_check)} = 1;
+                            }
+                        }
+                    );
+                }
+
+                my @k = keys(%adjacent_unknowns);
+                if (@k == 1)
+                {
+                    # Bingo - this black region only has one cell to expand to.
+                    $self->_mark_as_black([split/,/,$k[0]]);
+                    $found = 1;
+                }
+            }
+        }
+    );
+
+    if ($found)
+    {
+        $self->_add_move(
+            {
+                reason => "expand_black_regions",
+            }
+        );
+    }
+
+    return;
+}
+
 sub _solve_using
 {
     my $self = shift;
