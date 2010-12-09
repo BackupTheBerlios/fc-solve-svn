@@ -136,7 +136,7 @@ sub _init_queue
 {
     my $island = shift;
 
-    $island->_queue([map { [0,$_->_to_pair()] } @{$island->known_cells()}]);
+    $island->_queue([map { [0,$_] } @{$island->known_cells()}]);
 
     return;
 }
@@ -170,17 +170,13 @@ sub _reachable_brfs_scan_handle_item
 {
     my ($island, $board, $item) = @_;
 
-    my ($dist, $c) = @$item;
+    my ($dist, $coords) = @$item;
 
     if ($dist == $island->_dist_limit())
     {
         return;
     }
 
-    my $coords = Games::Nurikabe::Solver::Coords->new(
-        {y => $c->[0], x => $c->[1], }
-    );
-    
     $board->_vicinity_loop($coords,
         sub {
             my $to_check = shift;
@@ -195,7 +191,7 @@ sub _reachable_brfs_scan_handle_item
             $island->_enqueue($cell->set_island_reachable(
                 $island->idx(),
                 $dist+1,
-                $to_check->_to_pair(),
+                $to_check,
             ));
         },
     );
