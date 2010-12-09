@@ -57,7 +57,12 @@ sub add_offset
 {
     my ($self, $coords, $offset) = @_;
 
-    return [$coords->[0] + $offset->[0], $coords->[1] + $offset->[1]];
+    return Games::Nurikabe::Solver::Coords->new(
+        {
+            y => $coords->y + $offset->[0], 
+            x => $coords->x + $offset->[1],
+        }
+    );
 }
 
 =head1 AUTHOR

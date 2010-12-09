@@ -64,17 +64,11 @@ sub _vicinity_loop
 
     foreach my $off_coords (
         grep { $board->_is_in_bounds($_) }
-        map { $board->add_offset($coords->_to_pair, $_) }
+        map { $board->add_offset($coords, $_) }
         ([-1,0],[0,-1],[0,1],[1,0])
     )
     {
-        $callback->(
-            Games::Nurikabe::Solver::Coords->new(
-                {
-                    y => $off_coords->[0], x => $off_coords->[1]
-                }
-            )
-        );
+        $callback->($off_coords);
     }
 
     return;
@@ -496,13 +490,12 @@ sub _calc_vicinity
 
 sub _is_in_bounds
 {
-    my $self = shift;
-    my ($y, $x) = @{shift()};
+    my ($self, $coords) = @_;
 
     return
         (
-            ($y >= 0) && ($y < $self->_height())
-         && ($x >= 0) && ($x < $self->_width())
+            ($coords->y >= 0) && ($coords->y < $self->_height())
+         && ($coords->x >= 0) && ($coords->x < $self->_width())
         );
 }
 
@@ -554,14 +547,14 @@ sub _adj_whites_handle_shape
         return;
     }
 
-    my $other_cell = $self->get_cell(Games::Nurikabe::Solver::Coords->new({y => $other_coords->[0], x => $other_coords->[1]}));
+    my $other_cell = $self->get_cell($other_coords);
     
     if ($other_cell->not_same_island($cell))
     {
         # Bingo.
         foreach my $b_off (@$blacks_offsets)
         {
-            $self->_mark_as_black($self->add_offset($c, $b_off));
+            $self->_mark_as_black($self->add_offset($c, $b_off)->_to_pair);
         }
 
         $self->_add_move(
@@ -569,7 +562,7 @@ sub _adj_whites_handle_shape
                 reason => "adjacent_whites",
                 reason_params =>
                 {
-                    base_coords => [@$c],
+                    base_coords => $c->_to_pair,
                     offset => [@$offset],
                     islands =>
                     [
@@ -627,7 +620,12 @@ sub _solve_using_adjacent_whites
 
             foreach my $shape (@$shapes_list)
             {
-                $self->_adj_whites_handle_shape($c, $cell, $shape);
+                $self->_adj_whites_handle_shape(
+                    Games::Nurikabe::Solver::Coords->new(
+                        {
+                        y => $c->[0], x => $c->[1],
+                        }
+                    ), $cell, $shape);
             }
         }
     );
