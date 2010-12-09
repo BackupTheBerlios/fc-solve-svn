@@ -330,14 +330,7 @@ sub _actual_mark
 {
     my ($self, $coords, $verdict) = @_;
 
-    $self->get_cell(
-        Games::Nurikabe::Solver::Coords->new(
-            {
-                y => $coords->[0],
-                x => $coords->[1],
-            }
-        )
-    )->status($verdict);
+    $self->get_cell($coords)->status($verdict);
 
     push @{$self->_verdict_marked_cells()->{$verdict}},
         $coords
@@ -350,16 +343,11 @@ sub _mark_as_black
 {
     my ($self, $c) = @_;
 
-    my $cell = $self->get_cell(
-        Games::Nurikabe::Solver::Coords->new
-        (
-            { y => $c->[0], x => $c->[1] }
-        )
-    );
+    my $cell = $self->get_cell($c);
 
     if ($cell->status() eq $NK_WHITE)
     {
-        die "Cell ($c->[0],$c->[1]) should not be white but it is";
+        die "Cell (" . $c->to_s() . ") should not be white but it is";
     }
 
     if ($cell->status() eq $NK_BLACK)
@@ -378,18 +366,11 @@ sub _mark_as_white
 {
     my ($self, $c, $idx) = @_;
 
-    my $cell = $self->get_cell(
-        Games::Nurikabe::Solver::Coords->new(
-            {
-                y => $c->[0],
-                x => $c->[1],
-            }
-        ),
-    );
+    my $cell = $self->get_cell($c);
 
     if ($cell->status() eq $NK_BLACK)
     {
-        die "Cell ($c->[0],$c->[1]) should not be black but it is";
+        die "Cell (" . $c->to_s() . ") should not be black but it is";
     }
 
     if ($cell->status() eq $NK_WHITE)
@@ -443,7 +424,7 @@ sub _solve_using_surround_island
 
             foreach my $coords (@$black_cells)
             {
-                $self->_mark_as_black($coords->_to_pair);
+                $self->_mark_as_black($coords);
             }
             
             $self->_add_move(
@@ -513,13 +494,15 @@ sub _solve_using_surrounded_by_blacks
                 return;
             }
 
-            if (all { $self->get_cell(Games::Nurikabe::Solver::Coords->new({y => $_->[1], x => $_->[0] } ))->status() eq $NK_BLACK }
+            if (all { $self->get_cell(Games::Nurikabe::Solver::Coords->new({y => $_->[0], x => $_->[1] } ))->status() eq $NK_BLACK }
                 (@{$self->_calc_vicinity($coords)})
             )
             {
                 # We got an unknown cell that's entirely surrounded by blacks -
                 # let's do our thing.
-                $self->_mark_as_black($coords);
+                $self->_mark_as_black(
+                    Games::Nurikabe::Solver::Coords->new({y => $coords->[0], x => $coords->[1] } )
+                );
                 $self->_add_move(
                     {
                         reason => "surrounded_by_blacks",
@@ -554,7 +537,7 @@ sub _adj_whites_handle_shape
         # Bingo.
         foreach my $b_off (@$blacks_offsets)
         {
-            $self->_mark_as_black($self->add_offset($c, $b_off)->_to_pair);
+            $self->_mark_as_black($self->add_offset($c, $b_off));
         }
 
         $self->_add_move(
@@ -664,7 +647,11 @@ sub _solve_using_distance_from_islands
 
             if ($cell->status() eq $NK_UNKNOWN && ! $cell->_reachable())
             {
-                $self->_mark_as_black($coords);
+                $self->_mark_as_black(
+                    Games::Nurikabe::Solver::Coords->new(
+                        { y => $coords->[0], x => $coords->[1] }
+                    )
+                );
             }
         },
     );
@@ -820,7 +807,7 @@ sub _solve_using_expand_black_regions
                             }
                             elsif ($c->status() eq $NK_UNKNOWN)
                             {
-                                $adjacent_unknowns{$to_check->to_s} = 1;
+                                $adjacent_unknowns{$to_check->to_s} = $to_check;
                             }
                         }
                     );
@@ -830,7 +817,7 @@ sub _solve_using_expand_black_regions
                 if (@k == 1)
                 {
                     # Bingo - this black region only has one cell to expand to.
-                    $self->_mark_as_black([split/,/,$k[0]]);
+                    $self->_mark_as_black($adjacent_unknowns{$k[0]});
                     $found = 1;
                 }
             }

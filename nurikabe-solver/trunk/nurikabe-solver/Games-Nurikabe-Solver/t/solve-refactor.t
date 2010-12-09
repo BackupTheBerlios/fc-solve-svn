@@ -14,6 +14,13 @@ use Games::Nurikabe::Solver::Board;
 
 use List::MoreUtils qw(any);
 
+sub verdict_cells
+{
+    my ($m, $verdict) = @_;
+
+    return [map { $_->_to_pair() } @{$m->get_verdict_cells($verdict)} ];
+}
+
 {
     my $string_representation = <<"EOF";
 Width=2 Height=2
@@ -44,7 +51,7 @@ EOF
 
         # TEST
         eq_or_diff(
-            $m->get_verdict_cells($NK_BLACK),
+            verdict_cells($m, $NK_BLACK),
             [[0,1],[1,0]],
             "Verdicted cells is OK.",
         );
@@ -73,7 +80,7 @@ EOF
 
         # TEST
         eq_or_diff(
-            $m->get_verdict_cells($NK_BLACK),
+            verdict_cells($m, $NK_BLACK),
             [[1,1]],
             "Verdicted cells is OK.",
         );

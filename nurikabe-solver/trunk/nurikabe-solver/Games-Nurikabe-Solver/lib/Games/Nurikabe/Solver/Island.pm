@@ -235,13 +235,15 @@ sub add_white_cells
 
     foreach my $coord (@$new_cells)
     {
-        push @{$self->known_cells()}, 
-            Games::Nurikabe::Solver::Coords->new(
-                {
+        my $c = Games::Nurikabe::Solver::Coords->new(
+            {
                 y => $coord->[0], x => $coord->[1]
-                }
-            );
-        $board->_mark_as_white($coord, $self->idx);
+            }
+        );
+
+        push @{$self->known_cells()}, $c;
+
+        $board->_mark_as_white($c, $self->idx);
     }
 
     $self->known_cells($self->_sort_coords($self->known_cells()));

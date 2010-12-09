@@ -11,6 +11,14 @@ use Games::Nurikabe::Solver::Cell;
 use Games::Nurikabe::Solver::Constants qw($NK_UNKNOWN $NK_WHITE $NK_BLACK);
 use Games::Nurikabe::Solver::Board;
 
+sub verdict_cells
+{
+    my ($m, $verdict) = @_;
+
+    return [map { $_->_to_pair() } @{$m->get_verdict_cells($verdict)} ];
+}
+
+
 {
     my $string_representation = <<"EOF";
 Width=2 Height=2
@@ -58,7 +66,7 @@ EOF
 
         # TEST
         eq_or_diff(
-            $m->get_verdict_cells($NK_BLACK),
+            verdict_cells($m, $NK_BLACK),
             [[0,1],[1,0]],
             "Verdicted cells is OK.",
         );
@@ -97,7 +105,7 @@ EOF
 
         # TEST
         eq_or_diff(
-            $m->get_verdict_cells($NK_BLACK),
+            verdict_cells($m, $NK_BLACK),
             [[1,1]],
             "Verdicted cells is OK.",
         );
@@ -141,7 +149,7 @@ EOF
 
         # TEST
         eq_or_diff(
-            $m->get_verdict_cells($NK_BLACK),
+            verdict_cells($m, $NK_BLACK),
             [[0,1],[1,0], [1,2], [2,1]],
             "Verdicted cells is OK.",
         );
@@ -168,7 +176,7 @@ EOF
 
         # TEST
         eq_or_diff(
-            $m->get_verdict_cells($NK_BLACK),
+            verdict_cells($m, $NK_BLACK),
             [[0,0]],
             "Verdicted cells for 0 is OK.",
         );
@@ -179,7 +187,7 @@ EOF
 
         # TEST
         eq_or_diff(
-            $m->get_verdict_cells($NK_BLACK),
+            verdict_cells($m, $NK_BLACK),
             [[0,2]], 
             "Verdicted cells for 1 is OK.",
         );
@@ -190,7 +198,7 @@ EOF
 
         # TEST
         eq_or_diff(
-            $m->get_verdict_cells($NK_BLACK),
+            verdict_cells($m, $NK_BLACK),
             [[2,0]], 
             "Verdicted cells for 2 is OK.",
         );
@@ -201,7 +209,7 @@ EOF
 
         # TEST
         eq_or_diff(
-            $m->get_verdict_cells($NK_BLACK),
+            verdict_cells($m, $NK_BLACK),
             [[2,2]], 
             "Verdicted cells for 3 is OK.",
         );
@@ -260,7 +268,7 @@ EOF
 
         # TEST
         eq_or_diff(
-            $m->get_verdict_cells($NK_BLACK),
+            verdict_cells($m, $NK_BLACK),
             [[0,1],[1,0]],
             "Verdicted cells[0] are OK.",
         );
@@ -287,7 +295,7 @@ EOF
 
         # TEST
         eq_or_diff(
-            $m->get_verdict_cells($NK_BLACK),
+            verdict_cells($m, $NK_BLACK),
             [[1,3],[2,4]],
             "Verdicted cells[1] are OK.",
         );
@@ -314,7 +322,7 @@ EOF
 
         # TEST
         eq_or_diff(
-            $m->get_verdict_cells($NK_BLACK),
+            verdict_cells($m, $NK_BLACK),
             [[6,4],[7,5]],
             "Verdicted cells[2] are OK.",
         );
@@ -341,7 +349,7 @@ EOF
 
         # TEST
         eq_or_diff(
-            $m->get_verdict_cells($NK_BLACK),
+            verdict_cells($m, $NK_BLACK),
             [[7,8],[8,7]],
             "Verdicted cells[3] are OK.",
         );
@@ -407,7 +415,7 @@ EOF
 
         # TEST
         eq_or_diff(
-            $m->get_verdict_cells($NK_BLACK),
+            verdict_cells($m, $NK_BLACK),
             [[1,2]],
             "Verdicted cells[0] are [[1,2]].",
         );
@@ -434,7 +442,7 @@ EOF
 
         # TEST
         eq_or_diff(
-            $m->get_verdict_cells($NK_BLACK),
+            verdict_cells($m, $NK_BLACK),
             [[4,4]],
             "Verdicted cells[1] are [[4,4]].",
         );
@@ -461,7 +469,7 @@ EOF
 
         # TEST
         eq_or_diff(
-            $m->get_verdict_cells($NK_BLACK),
+            verdict_cells($m, $NK_BLACK),
             [[7,6]],
             "Verdicted cells[2] are [[7,6]].",
         );
@@ -501,7 +509,7 @@ sub in_black
 {
     my ($self, $coords) = @_;
     
-    return (any { $_->[0] == $coords->[0] && $_->[1] == $coords->[1] }
+    return (any { $_->y == $coords->[0] && $_->x == $coords->[1] }
            @{$self->move->get_verdict_cells($NK_BLACK)})
        ;
 }
@@ -510,7 +518,7 @@ sub in_white
 {
     my ($self, $coords) = @_;
     
-    return (any { $_->[0] == $coords->[0] && $_->[1] == $coords->[1] }
+    return (any { $_->y == $coords->[0] && $_->x == $coords->[1] }
            @{$self->move->get_verdict_cells($NK_WHITE)})
        ;
 }
