@@ -58,7 +58,27 @@ Returns the column (or "x") coordinate.
 
 Returns the row (or "y") coordinate.
 
+=head2 to_s()
+
+Convert the coordinates to a string representation.
+
 =cut
+
+sub to_s
+{
+    my $self = shift;
+
+    return $self->y() . ',' . $self->x();
+}
+
+# TODO : Add an exception throw here because this is only a temporary method
+# that should later not be used.
+sub _to_pair
+{
+    my $self = shift;
+
+    return [$self->y(), $self->x()];
+}
 
 1;
 

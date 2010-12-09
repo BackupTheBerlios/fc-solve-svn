@@ -72,7 +72,13 @@ sub _vicinity_loop
         ([-1,0],[0,-1],[0,1],[1,0])
     )
     {
-        $callback->($off_coords);
+        $callback->(
+            Games::Nurikabe::Solver::Coords->new(
+                {
+                    y => $off_coords->[0], x => $off_coords->[1]
+                }
+            )
+        );
     }
 
     return;
@@ -801,19 +807,18 @@ sub _solve_using_expand_black_regions
                         sub {
                             my $to_check = shift;
 
-                            my $c = $self->get_cell(
-                                Games::Nurikabe::Solver::Coords->new({ y => $to_check->[0], x => $to_check->[1]}));
+                            my $c = $self->get_cell($to_check);
 
                             if ($c->status() eq $NK_BLACK)
                             {
                                 if (! $c->already_processed())
                                 {
-                                    push @queue, $to_check;
+                                    push @queue, $to_check->_to_pair;
                                 }
                             }
                             elsif ($c->status() eq $NK_UNKNOWN)
                             {
-                                $adjacent_unknowns{join(",",@$to_check)} = 1;
+                                $adjacent_unknowns{$to_check->to_s} = 1;
                             }
                         }
                     );

@@ -117,11 +117,11 @@ sub surround
             $cell,
             sub {
                 my $to_check = shift;
-                my $s = join(",",@$to_check);
+                my $s = $to_check->to_s;
 
                 if (!exists($exclude_coords{$s}))
                 {
-                    push @ret, $to_check;
+                    push @ret, $to_check->_to_pair(); 
                     # Make sure we don't repeat ourselves
                     $exclude_coords{$s} = 1;
                 }
@@ -181,14 +181,7 @@ sub _reachable_brfs_scan_handle_item
         sub {
             my $to_check = shift;
 
-            my $cell = $board->get_cell(
-                Games::Nurikabe::Solver::Coords->new(
-                    {
-                        y => $to_check->[0],
-                        x => $to_check->[1],
-                    }
-                )
-            );
+            my $cell = $board->get_cell($to_check);
 
             if (! $cell->can_be_marked_by_island($island))
             {
@@ -198,7 +191,7 @@ sub _reachable_brfs_scan_handle_item
             $island->_enqueue($cell->set_island_reachable(
                 $island->idx(),
                 $dist+1,
-                $to_check
+                $to_check->_to_pair(),
             ));
         },
     );
