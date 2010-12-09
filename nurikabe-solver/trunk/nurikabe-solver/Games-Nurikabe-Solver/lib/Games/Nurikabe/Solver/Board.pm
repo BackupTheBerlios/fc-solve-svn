@@ -339,6 +339,31 @@ sub _mark_as_black
     return $self->_actual_mark($c,$NK_BLACK);
 }
 
+sub _mark_as_white
+{
+    my ($self, $c, $idx) = @_;
+
+    my $cell = $self->get_cell($c);
+
+    if ($cell->status() eq $NK_BLACK)
+    {
+        die "Cell ($c->[0],$c->[1]) should not be black but it is";
+    }
+
+    if ($cell->status() eq $NK_WHITE)
+    {
+        # Do nothing - it's already black.
+        return;
+    }
+
+    $cell->island($idx);
+
+    $self->_found_totals()->{$NK_WHITE}++;
+    $self->_found_totals()->{$NK_UNKNOWN}--;
+
+    return $self->_actual_mark($c,$NK_WHITE);
+}
+
 sub _cells_loop
 {
     my ($self, $callback) = @_;
@@ -579,7 +604,7 @@ sub _solve_using_distance_from_islands
     }
 
     # Now do a Breadth-First Search scan for every island and mark the
-    # islands reachable by it.
+    # cells reachable by it.
 
     foreach my $island (@{$self->_islands()})
     {
@@ -603,6 +628,84 @@ sub _solve_using_distance_from_islands
             reason => "distance_from_islands",
         }
     );
+
+    return;
+}
+
+sub _solve_using_fully_expand_island
+{
+    my $self = shift;
+
+    # Mark non-traversable cells - these are cells that are too close 
+    # to a white island cell.
+    foreach my $island (@{$self->_islands()})
+    {
+        my $non_traverse = $island->surround({board => $self });
+
+        foreach my $coords (@$non_traverse)
+        {
+            $self->get_cell($coords)->island_in_proximity($island->idx());
+        }
+    }
+
+    # Now do a Breadth-First Search scan for every island and mark the
+    # cells reachable by it.
+
+    foreach my $island (@{$self->_islands()})
+    {
+        $island->mark_reachable_brfs_scan({board => $self});
+    }
+
+    my @island_reachable_cells = (map { [] } @{$self->_islands()});
+
+    # Now mark the unreachable states.
+    $self->_cells_loop(
+        sub {
+            my ($coords, $cell) = @_;
+
+            if (($cell->status() eq $NK_UNKNOWN)
+                && $cell->_reachable()
+            )
+            {
+                foreach my $idx (0 .. $#{$self->_islands()})
+                {
+                    if (defined($cell->_island_reachable->[$idx]))
+                    {
+                        push @{$island_reachable_cells[$idx]}, [@$coords];
+                    }
+                }
+            }
+        },
+    );
+
+    my $moved = 0;
+
+    foreach my $idx (0 .. $#{$self->_islands()})
+    {
+        my $island = $self->_islands->[$idx];
+
+        my $count = @{$island_reachable_cells[$idx]} + @{$island->known_cells};
+
+        # We can mark all these cells as white, since the island is full.
+        if ($count == $island->order())
+        {
+            $moved = 1;
+            $island->add_white_cells({
+                    board => $self,
+                    cells => $island_reachable_cells[$idx]
+                }
+            );
+        }
+    }
+
+    if ($moved)
+    {
+        $self->_add_move(
+            {
+                reason => "fully_expand_island",
+            }
+        );
+    }
 
     return;
 }

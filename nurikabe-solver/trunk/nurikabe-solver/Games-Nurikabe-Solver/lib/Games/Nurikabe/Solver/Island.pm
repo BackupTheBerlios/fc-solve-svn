@@ -232,6 +232,31 @@ sub mark_reachable_brfs_scan
     return;
 }
 
+=head2 $island->add_white_cells( { board => $board, cells => [@list],} )
+
+Add these cells now known as white to the island.
+
+=cut
+
+sub add_white_cells
+{
+    my ($self, $args) = @_;
+
+    my $board = $args->{'board'};
+    my $new_cells = $args->{'cells'};
+
+    foreach my $coord (@$new_cells)
+    {
+        push @{$self->known_cells()}, [@$coord];
+        $board->_mark_as_white($coord, $self->idx);
+    }
+
+    $self->known_cells($self->_sort_coords($self->known_cells()));
+
+    return;
+}
+
+
 =head1 AUTHOR
 
 Shlomi Fish, C<< <shlomif at cpan.org> >>

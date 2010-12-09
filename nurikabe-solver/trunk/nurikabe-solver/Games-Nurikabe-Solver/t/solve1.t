@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 78;
+use Test::More tests => 80;
 
 use Test::Differences;
 
@@ -506,6 +506,34 @@ sub in_black
        ;
 }
 
+sub in_white
+{
+    my ($self, $coords) = @_;
+    
+    return (any { $_->[0] == $coords->[0] && $_->[1] == $coords->[1] }
+           @{$self->move->get_verdict_cells($NK_WHITE)})
+       ;
+}
+
+sub multi_in_white
+{
+    my ($self, $list_of_coords) = @_;
+
+    my @not_found = (grep { !$self->in_white($_) } @$list_of_coords);
+
+    if (! @not_found)
+    {
+        return '';
+    }
+    else
+    {
+        return 'Coordinates [ ' . 
+            join(" , ", map { '['.join(',',@$_) . ']' } @not_found)
+            . ' ] were not marked as white in this move.'
+            ;
+    }
+}
+
 sub reason
 {
     my $self = shift;
@@ -597,5 +625,68 @@ EOF
             !$m->in_black([3,6]),
             "Marked Cells does not contain (3,6) which is accessible",
         );
+    }
+}
+
+{
+    # http://www.logicgamesonline.com/nurikabe/archive.php?pid=981
+    # Daily 9*9 Nurikabe for 2008-10-01
+    my $string_representation = <<"EOF";
+Width=5 Height=5
+[] [6] [] [] []
+[] [] [] [2] []
+[] [] [] [] []
+[] [1] [] [] []
+[] [] [] [2] []
+EOF
+
+    my $board =
+        Games::Nurikabe::Solver::Board->load_from_string(
+            $string_representation
+        );
+
+    $board->_solve_using(
+        {
+            name => "surround_island",
+            params => {},
+        }
+    );
+
+    $board->_solve_using(
+        {
+            name => "surrounded_by_blacks",
+            params => {},
+        }
+    );
+
+    $board->_solve_using(
+        {
+            name => "distance_from_islands",
+            params => {},
+        }
+    );
+
+    my $moves = $board->_solve_using(
+        {
+            name => "fully_expand_island",
+            params => {},
+        }
+    );
+
+    my $m = MyMove->new({move => shift(@$moves)});
+
+    # TEST
+    eq_or_diff(
+        $moves,
+        [],
+        "No remaining moves except the first one."
+    );
+
+    my $verdict = $m->multi_in_white([[0,0],[0,2],[1,0],[1,1],[2,0]]);
+
+    # TEST
+    if (! ok (!$verdict, "All fully_expand_island white cells are there."))
+    {
+        diag($verdict);
     }
 }
