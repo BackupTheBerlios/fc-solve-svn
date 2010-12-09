@@ -111,10 +111,16 @@ sub surround
         );
 
     my @ret;
-    foreach my $cell (@{$self->known_cells()})
+    foreach my $cell_pair (@{$self->known_cells()})
     {
+        my $cell_coords = Games::Nurikabe::Solver::Coords->new(
+            {
+                y => $cell_pair->[0], x => $cell_pair->[1]
+            }
+        );
+
         $board->_vicinity_loop(
-            $cell,
+            $cell_coords,
             sub {
                 my $to_check = shift;
                 my $s = $to_check->to_s;
@@ -176,8 +182,12 @@ sub _reachable_brfs_scan_handle_item
     {
         return;
     }
+
+    my $coords = Games::Nurikabe::Solver::Coords->new(
+        {y => $c->[0], x => $c->[1], }
+    );
     
-    $board->_vicinity_loop($c,
+    $board->_vicinity_loop($coords,
         sub {
             my $to_check = shift;
 

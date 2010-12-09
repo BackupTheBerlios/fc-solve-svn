@@ -60,15 +60,11 @@ sub _vicinity_loop
 {
     my ($board, $coords, $callback) = @_;
 
-    my $cell = $board->get_cell(
-        Games::Nurikabe::Solver::Coords->new(
-            { y => $coords->[0], x => $coords->[1]}
-        )
-    );
+    my $cell = $board->get_cell($coords);
 
     foreach my $off_coords (
         grep { $board->_is_in_bounds($_) }
-        map { $board->add_offset($coords, $_) }
+        map { $board->add_offset($coords->_to_pair, $_) }
         ([-1,0],[0,-1],[0,1],[1,0])
     )
     {
@@ -779,7 +775,13 @@ sub _solve_using_expand_black_regions
 
     $self->_cells_loop(
         sub {
-            my ($cell_coords, $cell) = @_;
+            my ($cell_pair, $cell) = @_;
+
+            my $cell_coords = Games::Nurikabe::Solver::Coords->new(
+                {
+                    y => $cell_pair->[0], x => $cell_pair->[1]
+                }
+            );
 
             if (($cell->status() eq $NK_BLACK) && (! $cell->already_processed))
             {
@@ -794,8 +796,8 @@ sub _solve_using_expand_black_regions
                 QUEUE_LOOP:
                 while (my $coords = shift(@queue))
                 {
-                    my $q_c = $self->get_cell(
-                        Games::Nurikabe::Solver::Coords->new({y => $coords->[0], x => $coords->[1]}));
+                    my $q_c = $self->get_cell($coords);
+
                     if ($q_c->already_processed)
                     {
                         next QUEUE_LOOP;
@@ -813,7 +815,7 @@ sub _solve_using_expand_black_regions
                             {
                                 if (! $c->already_processed())
                                 {
-                                    push @queue, $to_check->_to_pair;
+                                    push @queue, $to_check;
                                 }
                             }
                             elsif ($c->status() eq $NK_UNKNOWN)
