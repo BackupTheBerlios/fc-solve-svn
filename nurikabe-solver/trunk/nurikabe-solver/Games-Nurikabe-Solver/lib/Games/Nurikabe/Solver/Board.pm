@@ -397,7 +397,10 @@ sub _cells_loop
         my $x = 0;
         foreach my $cell (@$row)
         {
-            $callback->([$y,$x], $cell);
+            $callback->(
+                Games::Nurikabe::Solver::Coords->new({y => $y, x => $x,}),
+                $cell,
+            );
         }
         continue
         {
@@ -441,29 +444,38 @@ sub _solve_using_surround_island
 
 sub _calc_vicinity
 {
-    my $self = shift;
-    my ($y, $x) = @{shift()};
+    my ($self, $coords) = @_;
+
+    my $y = $coords->y;
+    my $x = $coords->x;
 
     my @ret;
 
+    my $add_coord = sub {
+        my ($new_y, $new_x) = @_;
+
+        push @ret, 
+            Games::Nurikabe::Solver::Coords->new({y => $new_y, x => $new_x});
+    };
+
     if ($y > 0)
     {
-        push @ret, [$y-1,$x];
+        $add_coord->($y-1,$x);
     }
 
     if ($x > 0)
     {
-        push @ret, [$y,$x-1];
+        $add_coord->($y,$x-1);
     }
 
     if ($x+1 < $self->_width())
     {
-        push @ret, [$y, $x+1];
+        $add_coord->($y, $x+1);
     }
 
     if ($y+1 < $self->_height())
     {
-        push @ret, [$y+1, $x];
+        $add_coord->($y+1,$x);
     }
 
     return \@ret;
@@ -494,15 +506,13 @@ sub _solve_using_surrounded_by_blacks
                 return;
             }
 
-            if (all { $self->get_cell(Games::Nurikabe::Solver::Coords->new({y => $_->[0], x => $_->[1] } ))->status() eq $NK_BLACK }
+            if (all { $self->get_cell($_)->status() eq $NK_BLACK }
                 (@{$self->_calc_vicinity($coords)})
             )
             {
                 # We got an unknown cell that's entirely surrounded by blacks -
                 # let's do our thing.
-                $self->_mark_as_black(
-                    Games::Nurikabe::Solver::Coords->new({y => $coords->[0], x => $coords->[1] } )
-                );
+                $self->_mark_as_black($coords);
                 $self->_add_move(
                     {
                         reason => "surrounded_by_blacks",
@@ -603,12 +613,7 @@ sub _solve_using_adjacent_whites
 
             foreach my $shape (@$shapes_list)
             {
-                $self->_adj_whites_handle_shape(
-                    Games::Nurikabe::Solver::Coords->new(
-                        {
-                        y => $c->[0], x => $c->[1],
-                        }
-                    ), $cell, $shape);
+                $self->_adj_whites_handle_shape($c, $cell, $shape);
             }
         }
     );
@@ -647,11 +652,7 @@ sub _solve_using_distance_from_islands
 
             if ($cell->status() eq $NK_UNKNOWN && ! $cell->_reachable())
             {
-                $self->_mark_as_black(
-                    Games::Nurikabe::Solver::Coords->new(
-                        { y => $coords->[0], x => $coords->[1] }
-                    )
-                );
+                $self->_mark_as_black($coords);
             }
         },
     );
@@ -704,14 +705,7 @@ sub _solve_using_fully_expand_island
                 {
                     if (defined($cell->_island_reachable->[$idx]))
                     {
-                        push @{$island_reachable_coords[$idx]}, 
-                            Games::Nurikabe::Solver::Coords->new(
-                                {
-                                    y => $coords->[0],
-                                    x => $coords->[1],
-                                }
-                            )
-                            ;
+                        push @{$island_reachable_coords[$idx]}, $coords;
                     }
                 }
             }
@@ -769,13 +763,7 @@ sub _solve_using_expand_black_regions
 
     $self->_cells_loop(
         sub {
-            my ($cell_pair, $cell) = @_;
-
-            my $cell_coords = Games::Nurikabe::Solver::Coords->new(
-                {
-                    y => $cell_pair->[0], x => $cell_pair->[1]
-                }
-            );
+            my ($cell_coords, $cell) = @_;
 
             if (($cell->status() eq $NK_BLACK) && (! $cell->already_processed))
             {
