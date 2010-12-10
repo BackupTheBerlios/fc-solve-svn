@@ -227,9 +227,9 @@ sub load_from_string
                         {
                             idx => $index,
                             known_cells => [
-                                Games::Nurikabe::Solver::Coords->new(
+                                $self->_new_coords(
                                     { y => $y, x => $x}
-                                )
+                                ),
                             ],
                             order => $num_cells,
                         },
@@ -398,7 +398,7 @@ sub _cells_loop
         foreach my $cell (@$row)
         {
             $callback->(
-                Games::Nurikabe::Solver::Coords->new({y => $y, x => $x,}),
+                $self->_new_coords({y => $y, x => $x}),
                 $cell,
             );
         }
@@ -454,8 +454,7 @@ sub _calc_vicinity
     my $add_coord = sub {
         my ($new_y, $new_x) = @_;
 
-        push @ret, 
-            Games::Nurikabe::Solver::Coords->new({y => $new_y, x => $new_x});
+        push @ret, $self->_new_coords({y => $new_y, x => $new_x});
     };
 
     if ($y > 0)
