@@ -71,11 +71,15 @@ sub to_s
     return $self->y() . ',' . $self->x();
 }
 
-# TODO : Add an exception throw here because this is only a temporary method
-# that should later not be used.
-sub _to_pair
+=head2 [$y, $x] = $coords->to_aref()
+
+Returns an array reference containing the y and x coordinates (in that order).
+
+=cut
+
+sub to_aref
 {
-    my $self = shift;
+    my ($self) = @_;
 
     return [$self->y(), $self->x()];
 }

@@ -15,14 +15,14 @@ sub verdict_cells
 {
     my ($m, $verdict) = @_;
 
-    return [map { $_->_to_pair() } @{$m->get_verdict_cells($verdict)} ];
+    return [map { $_->to_aref() } @{$m->get_verdict_cells($verdict)} ];
 }
 
 sub _base_coords
 {
     my ($m) = @_;
 
-    return $m->reason_param("base_coords")->_to_pair();
+    return $m->reason_param("base_coords")->to_aref;
 }
 
 {

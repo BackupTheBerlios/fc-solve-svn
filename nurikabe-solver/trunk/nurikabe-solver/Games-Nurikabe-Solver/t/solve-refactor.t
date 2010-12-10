@@ -18,7 +18,7 @@ sub verdict_cells
 {
     my ($m, $verdict) = @_;
 
-    return [map { $_->_to_pair() } @{$m->get_verdict_cells($verdict)} ];
+    return [map { $_->to_aref() } @{$m->get_verdict_cells($verdict)} ];
 }
 
 {

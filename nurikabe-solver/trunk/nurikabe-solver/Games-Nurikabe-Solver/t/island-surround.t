@@ -74,7 +74,7 @@ sub is_island_surround
         );
 
     return eq_or_diff(
-        [map { $_->_to_pair() } @{$got_surrounded_cells}],
+        [map { $_->to_aref() } @{$got_surrounded_cells}],
         $bi->positions("B"),
         $blurb
     );
