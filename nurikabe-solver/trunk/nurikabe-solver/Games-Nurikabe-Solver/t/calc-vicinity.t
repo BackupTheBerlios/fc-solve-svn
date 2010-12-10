@@ -29,9 +29,8 @@ EOF
         my ($coords, $vicinity, $blurb) = @_;
 
         eq_or_diff(
-            [ map { $_->to_aref() } @{$board->_calc_vicinity(
-                    Games::Nurikabe::Solver::Coords->new($coords)
-                ) }
+            [ map { $_->to_aref() }
+                @{ $board->_calc_vicinity($board->_new_coords($coords)) }
             ],
             $vicinity,
             $blurb
