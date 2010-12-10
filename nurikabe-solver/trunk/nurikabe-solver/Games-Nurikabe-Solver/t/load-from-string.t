@@ -35,9 +35,7 @@ EOF
 
     my $get_cell = sub {
         my $xy = shift;
-        return $board->get_cell(
-            Games::Nurikabe::Solver::Coords->new($xy)
-        );
+        return $board->get_cell($board->_new_coords($xy));
     };
 
     # TEST
