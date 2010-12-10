@@ -46,6 +46,13 @@ sub new
     return $self;
 }
 
+sub _new_coords
+{
+    my ($self, $yx) = @_;
+
+    return Games::Nurikabe::Solver::Coords->new($yx);
+}
+
 =head2 my $offset_coords = $self->add_offset($coords, $offset)
 
 Returns the offset coords based on $coords (an [Y,X] coordinates
@@ -57,7 +64,7 @@ sub add_offset
 {
     my ($self, $coords, $offset) = @_;
 
-    return Games::Nurikabe::Solver::Coords->new(
+    return $self->_new_coords(
         {
             y => $coords->y + $offset->[0], 
             x => $coords->x + $offset->[1],
