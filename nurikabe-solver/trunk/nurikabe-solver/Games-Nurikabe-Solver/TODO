@@ -5,3 +5,5 @@ squares are already connected.
 of two elements.
     - Implement - to_s().
     - a from_s() constructor.
+
+* Convert from Class::Accessor to Class::XSAccessor.
