@@ -18,6 +18,12 @@ sub verdict_cells
     return [map { $_->_to_pair() } @{$m->get_verdict_cells($verdict)} ];
 }
 
+sub _base_coords
+{
+    my ($m) = @_;
+
+    return $m->reason_param("base_coords")->_to_pair();
+}
 
 {
     my $string_representation = <<"EOF";
@@ -283,7 +289,7 @@ EOF
 
         # TEST
         eq_or_diff (
-            $m->reason_param("base_coords"),
+            _base_coords($m),
             [0,0],
             "Base coords[0] is (0,0)."
         );
@@ -310,7 +316,7 @@ EOF
 
         # TEST
         eq_or_diff (
-            $m->reason_param("base_coords"),
+            _base_coords($m),
             [1,4],
             "Base coords[1] is (1,4)."
         );
@@ -337,7 +343,7 @@ EOF
 
         # TEST
         eq_or_diff (
-            $m->reason_param("base_coords"),
+            _base_coords($m),
             [6,5],
             "Base coords[2] is (6,5)."
         );
@@ -364,7 +370,7 @@ EOF
 
         # TEST
         eq_or_diff (
-            $m->reason_param("base_coords"),
+            _base_coords($m),
             [7,7],
             "Base coords[3] is (7,7)."
         );
@@ -430,7 +436,7 @@ EOF
 
         # TEST
         eq_or_diff (
-            $m->reason_param("base_coords"),
+            _base_coords($m),
             [1,1],
             "Base coords[0] is (1,1)."
         );
@@ -457,7 +463,7 @@ EOF
 
         # TEST
         eq_or_diff (
-            $m->reason_param("base_coords"),
+            _base_coords($m),
             [3,4],
             "Base coords[0] is (3,4)."
         );
@@ -484,7 +490,7 @@ EOF
 
         # TEST
         eq_or_diff (
-            $m->reason_param("base_coords"),
+            _base_coords($m),
             [7,5],
             "Base coords[0] is (7,5)."
         );

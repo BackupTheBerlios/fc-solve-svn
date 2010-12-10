@@ -555,7 +555,7 @@ sub _adj_whites_handle_shape
                 reason => "adjacent_whites",
                 reason_params =>
                 {
-                    base_coords => $c->_to_pair,
+                    base_coords => $c,
                     offset => [@$offset],
                     islands =>
                     [
