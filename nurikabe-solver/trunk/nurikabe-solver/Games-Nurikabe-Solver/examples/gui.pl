@@ -126,9 +126,7 @@ sub perform_solve
     my $self = shift;
     my $move = shift;
 
-    my $method = "_solve_using_$move";
-
-    $self->{board}->$method();
+    my $moves = $self->{board}->_solve_using({ name => $move, });
 
     $self->OnPaint();
 
