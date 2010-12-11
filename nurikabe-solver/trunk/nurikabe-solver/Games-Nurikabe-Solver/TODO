@@ -1,6 +1,9 @@
 * Fix the problem with the expand_black_regions when all the black
 squares are already connected.
 
+Done:
+-----
+
 * Add a coords class instead of passing the coordinates as an array reference
 of two elements.
     - Implement - to_s().
