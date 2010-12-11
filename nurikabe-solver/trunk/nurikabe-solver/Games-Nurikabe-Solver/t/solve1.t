@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 84;
+use Test::More tests => 85;
 
 use Test::Differences;
 
@@ -790,5 +790,57 @@ EOF
     ok (
         $m->in_black([4,2]),
         "Expanded cells contain (4,2)",
+    );
+}
+
+# Test the expand_black_regions does not expand when all the black cells are
+# fully connected, because otherwise these cells may be white.
+{
+    my $string_representation = <<"EOF";
+Width=5 Height=5
+[] [6] [] [] []
+[] [] [] [2] []
+[] [] [] [] []
+[] [1] [] [] []
+[] [] [] [2] []
+EOF
+
+    my $board =
+        Games::Nurikabe::Solver::Board->load_from_string(
+            $string_representation
+        );
+
+    foreach my $method (qw(
+        surround_island
+        surrounded_by_blacks
+        distance_from_islands
+        fully_expand_island
+        expand_black_regions
+        adjacent_whites
+        expand_black_regions
+        fully_expand_island
+        expand_black_regions
+        ))
+    {
+        my $moves = $board->_solve_using( { name => $method } );
+
+        if (!@$moves)
+        {
+            die "No moves for method $method.";
+        }
+    }
+
+    my $moves = $board->_solve_using(
+        {
+            name => "expand_black_regions",
+            params => {},
+        }
+    );
+
+    # TEST
+    eq_or_diff (
+        $moves,
+        [],
+        "No moves were done as the black region is fully connected."
     );
 }

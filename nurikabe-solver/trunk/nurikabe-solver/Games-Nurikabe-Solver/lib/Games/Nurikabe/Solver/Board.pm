@@ -773,6 +773,8 @@ sub _solve_using_expand_black_regions
 
                 my %adjacent_unknowns;
 
+                my $this_black_region_cells_count = 0;
+
                 # TODO : abstract all BrFS searches into a common code.
                 QUEUE_LOOP:
                 while (my $coords = shift(@queue))
@@ -785,6 +787,8 @@ sub _solve_using_expand_black_regions
                     }
 
                     $q_c->already_processed(1);
+                    $this_black_region_cells_count++;
+
                     $self->_vicinity_loop(
                         $coords,
                         sub {
@@ -808,13 +812,22 @@ sub _solve_using_expand_black_regions
                 }
 
                 my @k = keys(%adjacent_unknowns);
-                if (@k == 1)
+
+                # Make sure we don't expand a black region that contains
+                # all known black cells in the board, because these cells
+                # may well as be white.
+                if (($this_black_region_cells_count < 
+                    $self->_found_totals->{$NK_BLACK})
+                        && (@k == 1)
+                )
                 {
                     # Bingo - this black region only has one cell to expand to.
                     $self->_mark_as_black($adjacent_unknowns{$k[0]});
                     $found = 1;
                 }
             }
+
+            return;
         }
     );
 
