@@ -502,14 +502,23 @@ EOF
 
 package MyMove;
 
-use base 'Class::Accessor';
+use base 'Games::Nurikabe::Solver::Base';
 
 use List::MoreUtils qw(any);
 
 use Games::Nurikabe::Solver::Constants qw($NK_UNKNOWN $NK_WHITE $NK_BLACK);
 use Games::Nurikabe::Solver::Cell;
 
-__PACKAGE__->mk_accessors(qw(move));
+__PACKAGE__->mk_acc_ref([qw(move)]);
+
+sub _init
+{
+    my ($self, $args) = @_;
+
+    $self->move($args->{move});
+
+    return;
+}
 
 sub in_black
 {

@@ -20,11 +20,11 @@ Version 0.01
 
 our $VERSION = '0.01';
 
-__PACKAGE__->mk_accessors(qw(
+__PACKAGE__->mk_acc_ref([qw(
     _verdicted_cells
     reason
     _reason_params
-    ));
+    )]);
 
 =head1 SYNOPSIS
 

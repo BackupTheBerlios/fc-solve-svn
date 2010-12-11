@@ -3,13 +3,24 @@ package BoardInput;
 use strict;
 use warnings;
 
-use base 'Class::Accessor';
+use base 'Games::Nurikabe::Solver::Base';
 
-__PACKAGE__->mk_accessors(qw(
+__PACKAGE__->mk_acc_ref([qw(
     width
     height
     _char_positions
-    ));
+    )]);
+
+sub _init
+{
+    my ($self, $args) = @_;
+
+    $self->width($args->{width});
+    $self->height($args->{height});
+    $self->_char_positions($args->{_char_positions});
+
+    return;
+}
 
 sub from_s
 {

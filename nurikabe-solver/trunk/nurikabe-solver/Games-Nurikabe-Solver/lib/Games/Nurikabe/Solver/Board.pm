@@ -25,7 +25,7 @@ Version 0.01
 
 our $VERSION = '0.01';
 
-__PACKAGE__->mk_accessors(qw(
+__PACKAGE__->mk_acc_ref([qw(
     _cells
     _expected_totals
     _found_totals
@@ -34,7 +34,7 @@ __PACKAGE__->mk_accessors(qw(
     _moves
     _verdict_marked_cells
     _width
-    ));
+    )]);
 
 =head1 SYNOPSIS
 

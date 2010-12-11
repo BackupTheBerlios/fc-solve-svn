@@ -19,14 +19,14 @@ Version 0.01
 
 our $VERSION = '0.01';
 
-__PACKAGE__->mk_accessors(qw(
+__PACKAGE__->mk_acc_ref([qw(
     status
     island
     island_in_proximity
     _reachable
     _island_reachable
     already_processed
-    ));
+    )]);
 
 =head1 SYNOPSIS
 

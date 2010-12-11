@@ -5,10 +5,11 @@ use warnings;
 
 use base 'Games::Nurikabe::Solver::Base';
 
-__PACKAGE__->mk_accessors(qw(
+__PACKAGE__->mk_acc_ref([qw(
     x
     y
-    ));
+    )]
+);
 
 =head1 NAME
 
