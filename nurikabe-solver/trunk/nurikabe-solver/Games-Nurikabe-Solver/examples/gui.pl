@@ -128,6 +128,15 @@ sub perform_solve
 
     my $moves = $self->{board}->_solve_using({ name => $move, });
 
+    my $log_fn = $ENV{NURIKABE_LOG};
+    if (defined($log_fn) && $moves)
+    {
+        open my $out_fh, '>>', $log_fn
+            or die "Cannot open '$log_fn' (\$NURIKABE_LOG environment var. - $!";
+        print {$out_fh} "$move\n";
+
+        close($out_fh);
+    }
     $self->OnPaint();
 
     return;
