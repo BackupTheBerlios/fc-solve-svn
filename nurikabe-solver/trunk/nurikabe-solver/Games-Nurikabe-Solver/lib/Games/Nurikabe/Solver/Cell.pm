@@ -145,6 +145,22 @@ sub can_be_marked_by_island
     return 1;
 }
 
+=head2 my $bool = $self->already_processed()
+
+Indicates if the cell was already processed by the mark-and-sweep.
+
+=head2 my $island_idx = $self->island()
+
+The index of the island to which this cells belongs to.
+
+=head2 my $island_idx = $self->island_in_proximity()
+
+Island in proximity.
+
+=head2 my $status = $self->status()
+
+The status of the cell. Can be either $NK_BLACK , $NK_WHITE or $NK_UNKNOWN .
+
 =head1 AUTHOR
 
 Shlomi Fish, C<< <shlomif at cpan.org> >>

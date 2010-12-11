@@ -100,6 +100,12 @@ sub reason_param
     return $self->_reason_params()->{$param};
 }
 
+=head2 reason
+
+An ID for the reason.
+
+B<TODO>: fill in the various IDs.
+
 =head1 AUTHOR
 
 Shlomi Fish, C<< <shlomif at cpan.org> >>
